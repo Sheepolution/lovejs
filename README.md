@@ -7,28 +7,52 @@ A copy of the LÖVE API into javascript.
 Installation
 -----------
 
+Download the ```love.js``` in the ```build``` folder.
+
+	<script type="text/javascript" src="love.js"></script>
+
+If you're a beginner with javascript, here's what your ```index.html``` should look like:
+
+```html
+<head>
+    <meta charset='utf-8'>
+    <title>Game</title>
+    <!-- The order in which files are loaded is important! love.js first! -->
     <script type="text/javascript" src="love.js"></script>
+    <!-- main.js is the file where you put in love.update and love.draw (see usage) -->
+    <script type="text/javascript" src="main.js"></script>
+</head>
+<body>
+    <canvas style="border:1px solid #000000;" id="canvas" width="1024" height="768"></canvas>
+</body>
+</html>
+```
+
+love.js and main.js should be in the same folder as index.html
 
 
 Usage
 -----
 
-	love.update = function (dt) {
+Put this in your main.js
 
-	}
+```javascript
+love.update = function (dt) {
 
-	love.draw = function () {
-		
-	}
+}
 
-	love.config = function (t) {
-		t.width = 800;
-		t.height = 600;
-	}
+love.draw = function () {
+	
+}
 
-	//Initialize love
-	love.run();
+love.config = function (t) {
+	t.width = 800;
+	t.height = 600;
+}
 
+//Initialize love
+love.run();
+```
 
 Modules
 -----------------
