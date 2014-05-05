@@ -66,7 +66,7 @@ love.draw = function () {
 	//Draw the pyramid
 	love.graphics.draw(obj.image,obj.x,obj.y,obj.r,obj.sx,obj.sy,49,42);
 	//Draw the description
-	love.graphics.print("Lövescript Demo v0.01",10,30);
+	love.graphics.print("lovescript Demo v0.01",10,30);
 	love.graphics.print("A/Up to speed up",10,55);
 	love.graphics.print("S/Down to slow down",10,75);
 	love.graphics.print("Space to invert direction",10,95);
