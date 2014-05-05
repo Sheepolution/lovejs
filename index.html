@@ -1,0 +1,324 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Lovescript by DaanHaaz</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/DaanHaaz/lovescript">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/DaanHaaz/lovescript/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/DaanHaaz/lovescript/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Lovescript</h1>
+          <p>The LÖVE API in javascript</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/DaanHaaz">DaanHaaz</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>
+<a name="lovescript" class="anchor" href="#lovescript"><span class="octicon octicon-link"></span></a>lovescript</h1>
+
+<p>A copy of the LÖVE API into javascript.</p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Download the <code>love.js</code> in the <code>build</code> folder.</p>
+
+<pre><code>&lt;script type="text/javascript" src="love.js"&gt;&lt;/script&gt;
+</code></pre>
+
+<p>If you're a beginner with javascript, here's what your <code>index.html</code> should look like:</p>
+
+<div class="highlight highlight-html"><pre><span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">'utf-8'</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;title&gt;</span>Game<span class="nt">&lt;/title&gt;</span>
+    <span class="c">&lt;!-- The order in which files are loaded is important! love.js first! --&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"love.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+    <span class="c">&lt;!-- main.js is the file where you put in love.update and love.draw (see usage) --&gt;</span>
+    <span class="nt">&lt;script </span><span class="na">type=</span><span class="s">"text/javascript"</span> <span class="na">src=</span><span class="s">"main.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+    <span class="nt">&lt;canvas</span> <span class="na">style=</span><span class="s">"border:1px solid #000000;"</span> <span class="na">id=</span><span class="s">"canvas"</span> <span class="na">width=</span><span class="s">"1024"</span> <span class="na">height=</span><span class="s">"768"</span><span class="nt">&gt;&lt;/canvas&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</pre></div>
+
+<p>love.js and main.js should be in the same folder as index.html</p>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>Put this in your main.js</p>
+
+<div class="highlight highlight-javascript"><pre><span class="nx">love</span><span class="p">.</span><span class="nx">update</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">dt</span><span class="p">)</span> <span class="p">{</span>
+
+<span class="p">}</span>
+
+<span class="nx">love</span><span class="p">.</span><span class="nx">draw</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+
+<span class="p">}</span>
+
+<span class="nx">love</span><span class="p">.</span><span class="nx">config</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">t</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">t</span><span class="p">.</span><span class="nx">width</span> <span class="o">=</span> <span class="mi">800</span><span class="p">;</span>
+    <span class="nx">t</span><span class="p">.</span><span class="nx">height</span> <span class="o">=</span> <span class="mi">600</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">//Initialize love</span>
+<span class="nx">love</span><span class="p">.</span><span class="nx">run</span><span class="p">();</span>
+</pre></div>
+
+<h2>
+<a name="modules" class="anchor" href="#modules"><span class="octicon octicon-link"></span></a>Modules</h2>
+
+<p>All the modules and their functions that are currently implemented. If a module/function is not here, it's not available (yet).</p>
+
+<h2>
+<a name="graphics" class="anchor" href="#graphics"><span class="octicon octicon-link"></span></a>Graphics</h2>
+
+<h4>
+<a name="arc-mode-x-y-radius-angle1-angle2-" class="anchor" href="#arc-mode-x-y-radius-angle1-angle2-"><span class="octicon octicon-link"></span></a>arc( mode, x, y, radius, angle1, angle2 )</h4>
+
+<p><em>Note: Missing segments</em></p>
+
+<h4>
+<a name="circle-mode-x-y-radius-" class="anchor" href="#circle-mode-x-y-radius-"><span class="octicon octicon-link"></span></a>circle( mode, x, y, radius )</h4>
+
+<p><em>Note: Missing segments</em></p>
+
+<h4>
+<a name="draw-drawable--quad--x-y-r-sx-sy-ox-oy-" class="anchor" href="#draw-drawable--quad--x-y-r-sx-sy-ox-oy-"><span class="octicon octicon-link"></span></a>draw( drawable [, quad ], x, y, r, sx, sy, ox, oy )</h4>
+
+<h4>
+<a name="line-x1-y1-x2-y2---or-line-xyxyxy-" class="anchor" href="#line-x1-y1-x2-y2---or-line-xyxyxy-"><span class="octicon octicon-link"></span></a>line( x1, y1, x2, y2, ... ) or line( [x,y,x,y,x,y...] )</h4>
+
+<h4>
+<a name="point-x-y-" class="anchor" href="#point-x-y-"><span class="octicon octicon-link"></span></a>point( x, y )</h4>
+
+<h4>
+<a name="polygon-mode-xyxyxy-" class="anchor" href="#polygon-mode-xyxyxy-"><span class="octicon octicon-link"></span></a>polygon( mode, [x,y,x,y,x,y...] )</h4>
+
+<h4>
+<a name="print-text-x-y-r-sx-sy-ox-oy-" class="anchor" href="#print-text-x-y-r-sx-sy-ox-oy-"><span class="octicon octicon-link"></span></a>print( text, x, y, r, sx, sy, ox, oy )</h4>
+
+<h4>
+<a name="rectangle-mode-x-y-w-h-" class="anchor" href="#rectangle-mode-x-y-w-h-"><span class="octicon octicon-link"></span></a>rectangle( mode, x, y, w, h )</h4>
+
+<h4>
+<a name="newfont-font-size-" class="anchor" href="#newfont-font-size-"><span class="octicon octicon-link"></span></a>newFont( font, size )</h4>
+
+<p><em>Note: Font needs to be loaded in html, you only give the name here.</em></p>
+
+<h4>
+<a name="newimage-filename-" class="anchor" href="#newimage-filename-"><span class="octicon octicon-link"></span></a>newImage( filename )</h4>
+
+<p><em>Note: There is no imageData</em></p>
+
+<h4>
+<a name="newquad-x-y-width-height-" class="anchor" href="#newquad-x-y-width-height-"><span class="octicon octicon-link"></span></a>newQuad( x, y, width, height )</h4>
+
+<p><em>Note: Missing reference width/height</em></p>
+
+<h4>
+<a name="getblendmode-" class="anchor" href="#getblendmode-"><span class="octicon octicon-link"></span></a>getBlendMode( )</h4>
+
+<h4>
+<a name="getcolor-" class="anchor" href="#getcolor-"><span class="octicon octicon-link"></span></a>getColor( )</h4>
+
+<h4>
+<a name="getdefaultfilter-" class="anchor" href="#getdefaultfilter-"><span class="octicon octicon-link"></span></a>getDefaultFilter( )</h4>
+
+<p><em>Note: See setDefaultFilter()</em></p>
+
+<h4>
+<a name="getfont-" class="anchor" href="#getfont-"><span class="octicon octicon-link"></span></a>getFont( )</h4>
+
+<h4>
+<a name="getpointsize-" class="anchor" href="#getpointsize-"><span class="octicon octicon-link"></span></a>getPointSize( )</h4>
+
+<h4>
+<a name="setbackgroundcolor-r-g-b-" class="anchor" href="#setbackgroundcolor-r-g-b-"><span class="octicon octicon-link"></span></a>setBackgroundColor( r, g, b )</h4>
+
+<h4>
+<a name="setblendmode-mode-" class="anchor" href="#setblendmode-mode-"><span class="octicon octicon-link"></span></a>setBlendMode( mode )</h4>
+
+<p><em>Note: Works only with html5 canvas blend modes</em></p>
+
+<h4>
+<a name="setcolor-r-g-b-a-" class="anchor" href="#setcolor-r-g-b-a-"><span class="octicon octicon-link"></span></a>setColor( r, g, b, a )</h4>
+
+<p><em>Note: Doesn't work with images</em></p>
+
+<h4>
+<a name="setdefaultfilter-filter-" class="anchor" href="#setdefaultfilter-filter-"><span class="octicon octicon-link"></span></a>setDefaultFilter( filter )</h4>
+
+<p>*Note: Cannot filter scaling up and down separately, missing anisotropy</p>
+
+<h4>
+<a name="setfont-font-" class="anchor" href="#setfont-font-"><span class="octicon octicon-link"></span></a>setFont( font )</h4>
+
+<h4>
+<a name="setlinewidth-width-" class="anchor" href="#setlinewidth-width-"><span class="octicon octicon-link"></span></a>setLineWidth( width )</h4>
+
+<h4>
+<a name="setpointsize-size-" class="anchor" href="#setpointsize-size-"><span class="octicon octicon-link"></span></a>setPointSize( size )</h4>
+
+<h4>
+<a name="pop-" class="anchor" href="#pop-"><span class="octicon octicon-link"></span></a>pop( )</h4>
+
+<h4>
+<a name="push-" class="anchor" href="#push-"><span class="octicon octicon-link"></span></a>push( )</h4>
+
+<h4>
+<a name="rotate-" class="anchor" href="#rotate-"><span class="octicon octicon-link"></span></a>rotate( )</h4>
+
+<h4>
+<a name="scale-" class="anchor" href="#scale-"><span class="octicon octicon-link"></span></a>scale( )</h4>
+
+<h4>
+<a name="shear-" class="anchor" href="#shear-"><span class="octicon octicon-link"></span></a>shear( )</h4>
+
+<h4>
+<a name="translate-" class="anchor" href="#translate-"><span class="octicon octicon-link"></span></a>translate( )</h4>
+
+<h2>
+<a name="audio" class="anchor" href="#audio"><span class="octicon octicon-link"></span></a>Audio</h2>
+
+<p><em>Note: Everything in seconds unit</em></p>
+
+<h4>
+<a name="newsource-file-" class="anchor" href="#newsource-file-"><span class="octicon octicon-link"></span></a>newSource( file )</h4>
+
+<p><em>Note: Missing static</em></p>
+
+<h4>
+<a name="sourcegetpitch-" class="anchor" href="#sourcegetpitch-"><span class="octicon octicon-link"></span></a>Source.getPitch( )</h4>
+
+<h4>
+<a name="sourcegetvolume-" class="anchor" href="#sourcegetvolume-"><span class="octicon octicon-link"></span></a>Source.getVolume( )</h4>
+
+<h4>
+<a name="sourceislooping-" class="anchor" href="#sourceislooping-"><span class="octicon octicon-link"></span></a>Source.isLooping( )</h4>
+
+<h4>
+<a name="sourceispaused-" class="anchor" href="#sourceispaused-"><span class="octicon octicon-link"></span></a>Source.isPaused( )</h4>
+
+<h4>
+<a name="sourceisplaying-" class="anchor" href="#sourceisplaying-"><span class="octicon octicon-link"></span></a>Source.isPlaying( )</h4>
+
+<h4>
+<a name="sourceisstopped-" class="anchor" href="#sourceisstopped-"><span class="octicon octicon-link"></span></a>Source.isStopped( )</h4>
+
+<h4>
+<a name="sourcepause-" class="anchor" href="#sourcepause-"><span class="octicon octicon-link"></span></a>Source.pause( )</h4>
+
+<h4>
+<a name="sourceplay-" class="anchor" href="#sourceplay-"><span class="octicon octicon-link"></span></a>Source.play( )</h4>
+
+<h4>
+<a name="sourceresume-" class="anchor" href="#sourceresume-"><span class="octicon octicon-link"></span></a>Source.resume( )</h4>
+
+<h4>
+<a name="sourcerewind-" class="anchor" href="#sourcerewind-"><span class="octicon octicon-link"></span></a>Source.rewind( )</h4>
+
+<h4>
+<a name="sourceseek-offset-" class="anchor" href="#sourceseek-offset-"><span class="octicon octicon-link"></span></a>Source.seek( offset )</h4>
+
+<h4>
+<a name="sourcesetlooping-loop-" class="anchor" href="#sourcesetlooping-loop-"><span class="octicon octicon-link"></span></a>Source.setLooping( loop )</h4>
+
+<h4>
+<a name="sourcesetpitch-pitch-" class="anchor" href="#sourcesetpitch-pitch-"><span class="octicon octicon-link"></span></a>Source.setPitch( pitch )</h4>
+
+<h4>
+<a name="sourcesetvolume-volume-" class="anchor" href="#sourcesetvolume-volume-"><span class="octicon octicon-link"></span></a>Source.setVolume( volume )</h4>
+
+<h4>
+<a name="sourcestop-" class="anchor" href="#sourcestop-"><span class="octicon octicon-link"></span></a>Source.stop( )</h4>
+
+<h4>
+<a name="sourcetell-" class="anchor" href="#sourcetell-"><span class="octicon octicon-link"></span></a>Source.tell( )</h4>
+
+<h4>
+<a name="pause-source-" class="anchor" href="#pause-source-"><span class="octicon octicon-link"></span></a>pause( source )</h4>
+
+<p>*Note: No arguments does not make all audio pause, stop, rewind or resume.</p>
+
+<h4>
+<a name="play-source-" class="anchor" href="#play-source-"><span class="octicon octicon-link"></span></a>play( source )</h4>
+
+<h4>
+<a name="resume-source-" class="anchor" href="#resume-source-"><span class="octicon octicon-link"></span></a>resume( source )</h4>
+
+<h4>
+<a name="rewind-source-" class="anchor" href="#rewind-source-"><span class="octicon octicon-link"></span></a>rewind( source )</h4>
+
+<h4>
+<a name="stop-source-" class="anchor" href="#stop-source-"><span class="octicon octicon-link"></span></a>stop( source )</h4>
+
+<h2>
+<a name="keyboard" class="anchor" href="#keyboard"><span class="octicon octicon-link"></span></a>Keyboard</h2>
+
+<h4>
+<a name="isdown-key--" class="anchor" href="#isdown-key--"><span class="octicon octicon-link"></span></a>isDown( key, ... )</h4>
+
+<h4>
+<a name="keypressed-key-" class="anchor" href="#keypressed-key-"><span class="octicon octicon-link"></span></a>keypressed( key )</h4>
+
+<p><em>Note: Missing isrepeat</em></p>
+
+<h4>
+<a name="keyreleased-key-" class="anchor" href="#keyreleased-key-"><span class="octicon octicon-link"></span></a>keyreleased( key )</h4>
+
+<h2>
+<a name="mouse" class="anchor" href="#mouse"><span class="octicon octicon-link"></span></a>Mouse</h2>
+
+<h4>
+<a name="getx-" class="anchor" href="#getx-"><span class="octicon octicon-link"></span></a>getX( )</h4>
+
+<h4>
+<a name="gety-" class="anchor" href="#gety-"><span class="octicon octicon-link"></span></a>getY( )</h4>
+
+<h4>
+<a name="isdown-button--" class="anchor" href="#isdown-button--"><span class="octicon octicon-link"></span></a>isDown( button, ... )</h4>
+
+<h4>
+<a name="mousepressed-x-y-button-" class="anchor" href="#mousepressed-x-y-button-"><span class="octicon octicon-link"></span></a>mousepressed( x, y, button )</h4>
+
+<h4>
+<a name="mousereleased-x-y-button-" class="anchor" href="#mousereleased-x-y-button-"><span class="octicon octicon-link"></span></a>mousereleased( x, y, button )</h4>
+
+<h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>lovescript is released under the <a href="http://opensource.org/licenses/MIT">MIT License</a></p>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
