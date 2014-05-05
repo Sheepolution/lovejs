@@ -16,7 +16,7 @@ obj.r = 1;
 obj.sx = 1;
 obj.sy = 1;
 obj.dir = 1;
-obj.speed = 0;
+obj.speed = 100;
 
 //The main updater
 love.update = function (dt) {
@@ -47,12 +47,12 @@ love.update = function (dt) {
 	obj.sy = 4*((400-obj.x)/400);
 
 	//Speed up the pyramid's movement
-	if (love.keyboard.isDown(["w","up"])) {
+	if (love.keyboard.isDown("w","up")) {
 		obj.speed += 300 * dt;
 	}
 
 	//Slow down the pyramid's movement
-	if (love.keyboard.isDown(["s","down"])) {
+	if (love.keyboard.isDown("s","down")) {
 		obj.speed -= 300 * dt;
 	}
 

@@ -30,9 +30,9 @@ love.graphics.arc = function (mode,x,y,r,a1,a2) {
 	love.graphics.mode(mode);
 }
 
-love.graphics.line = function (verts,y1,x2,y2) {
+love.graphics.line = function () {
 	this.ctx.beginPath();
-	if (typeof(verts) == "object") {
+	if (typeof(arguments[0]) == "object") {
 		this.ctx.moveTo(verts[0],verts[1]);
 		for (var i = 0; i < verts.length-2; i+=2) {
 			this.ctx.lineTo(verts[i+2],verts[i+3]);
@@ -41,9 +41,11 @@ love.graphics.line = function (verts,y1,x2,y2) {
 		
 	}
 	else {
-		this.ctx.moveTo(verts,y1);
-		this.ctx.lineTo(x2,y2);
-		this.ctx.stroke();
+		this.ctx.moveTo(arguments[0],arguments[1]);
+		for (var i = 0; i < arguments.length-2; i+=2) {
+			this.ctx.lineTo(arguments[i+2],arguments[i+3]);
+			this.ctx.stroke();
+		};
 	}
 	this.ctx.closePath();
 }

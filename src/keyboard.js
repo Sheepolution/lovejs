@@ -51,17 +51,11 @@ keyUpHandler = function(event) {
 }
 
 
-love.keyboard.isDown = function(key) {
-	key = key || "";
-	if (typeof(key) == "string") {
-		return love.keyboard.keysDown[key];
-	}
-	else {
-		for (var i = 0; i < key.length; i++) {
-			if (love.keyboard.keysDown[key[i]]) {
-				return true;
-			}
-		};
+love.keyboard.isDown = function() {
+	for (var i = 0; i < arguments.length; i++) {
+		if (love.keyboard.keysDown[arguments[i]]) {
+			return true;
+		}
 	}
 	return false;
 }

@@ -41,16 +41,11 @@ love.mouse.getY = function () {
 	return love.mouse.y;
 }
 
-love.mouse.isDown = function (button) {
-	if (typeof(button) == "string") {
-		return love.mouse.buttonsDown[button];
-	}
-	else {
-		for (var i = 0; i < button.length; i++) {
-			if (love.mouse.buttonsDown[button[i]]) {
-				return true;
-			}
-		};
+love.mouse.isDown = function () {
+	for (var i = 0; i < arguments.length; i++) {
+		if (love.mouse.buttonsDown[arguments[i]]) {
+			return true;
+		}
 	}
 	return false;
 }

@@ -53,9 +53,9 @@ love.graphics.arc = function (mode,x,y,r,a1,a2) {
 	love.graphics.mode(mode);
 }
 
-love.graphics.line = function (verts,y1,x2,y2) {
+love.graphics.line = function () {
 	this.ctx.beginPath();
-	if (typeof(verts) == "object") {
+	if (typeof(arguments[0]) == "object") {
 		this.ctx.moveTo(verts[0],verts[1]);
 		for (var i = 0; i < verts.length-2; i+=2) {
 			this.ctx.lineTo(verts[i+2],verts[i+3]);
@@ -64,9 +64,11 @@ love.graphics.line = function (verts,y1,x2,y2) {
 		
 	}
 	else {
-		this.ctx.moveTo(verts,y1);
-		this.ctx.lineTo(x2,y2);
-		this.ctx.stroke();
+		this.ctx.moveTo(arguments[0],arguments[1]);
+		for (var i = 0; i < arguments.length-2; i+=2) {
+			this.ctx.lineTo(arguments[i+2],arguments[i+3]);
+			this.ctx.stroke();
+		};
 	}
 	this.ctx.closePath();
 }
@@ -463,17 +465,11 @@ keyUpHandler = function(event) {
 }
 
 
-love.keyboard.isDown = function(key) {
-	key = key || "";
-	if (typeof(key) == "string") {
-		return love.keyboard.keysDown[key];
-	}
-	else {
-		for (var i = 0; i < key.length; i++) {
-			if (love.keyboard.keysDown[key[i]]) {
-				return true;
-			}
-		};
+love.keyboard.isDown = function() {
+	for (var i = 0; i < arguments.length; i++) {
+		if (love.keyboard.keysDown[arguments[i]]) {
+			return true;
+		}
 	}
 	return false;
 }
@@ -522,16 +518,11 @@ love.mouse.getY = function () {
 	return love.mouse.y;
 }
 
-love.mouse.isDown = function (button) {
-	if (typeof(button) == "string") {
-		return love.mouse.buttonsDown[button];
-	}
-	else {
-		for (var i = 0; i < button.length; i++) {
-			if (love.mouse.buttonsDown[button[i]]) {
-				return true;
-			}
-		};
+love.mouse.isDown = function () {
+	for (var i = 0; i < arguments.length; i++) {
+		if (love.mouse.buttonsDown[arguments[i]]) {
+			return true;
+		}
 	}
 	return false;
 }
@@ -583,51 +574,3 @@ love.graphics.drawloop = function (a) {
 }
 
 window.addEventListener('load', init);
-
-
-
-
-/*TODO:
-Make quad work as it's supposed to work.
-
-Have love.graphics.draw support color change by setColor.
-
-Image.functions. Probably need to use a preloader.
-
-
-Preloader to implement:
-
-love.graphics._numPendingImageLoads = 0;
-love.graphics._remoteImageCache = {};
-love.graphics._allImagesLoaded = Function.prototype; // empty function
-love.graphics._preloadImages = function (urls) {
-  var i;
-  for (i=0; i<urls.length; i++)
-    this.newImage(urls[i]);
-}
-love.graphics.newImage = function (url) {
-  var img;
-  if (url in this._remoteImageCache)
-    return this._remoteImageCache[url];
-  img = new Image();
-  img.src = url;
-  this._numPendingImageLoads++;
-  img.onload = function(){
-    this.loaded = true;
-    if (--this._numPendingImageLoads == 0)
-      this._allImagesLoaded();
-  }
-  return img;
-}
-
-/* Use example
-love.graphics._allImagesLoaded = function() {
-  /* Start the game here???
-}
-love.graphics._preloadImages([
-  'sprites.png',
-  'background0.png'
-]); 
-
-
-*/
