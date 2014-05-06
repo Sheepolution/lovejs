@@ -1,4 +1,4 @@
-//lovescript
+//loveJS
 //A LÖVE to javascript port
 
 var init = function () {
@@ -12,3 +12,6 @@ var init = function () {
 }
 
 var love = { };
+
+love._assetsLoaded = 0;
+love._assetsToBeLoaded = 0;

@@ -1,14 +1,14 @@
 //Create an object.
 obj = {};
-//Load in the image
-//love.graphics.newImage(url);
-obj.image = love.graphics.newImage("pyramid.png");
-//Load in the image
-//love.audio.newSource(url);
-obj.bounce = love.audio.newSource("bounce.ogg");
+//Preload the image
+//love.graphics.preload(url);
+love.graphics.preload("pyramid.png");
+//Preload the audio
+//love.audio.preload(url);
+love.audio.preload("bounce.ogg");
 //Get a new font
 //love.graphics.newFont(name,size);
-obj.font = love.graphics.newFont("arial",15);
+obj.font = love.graphics.newFont("arial",12);
 //All the other properties
 obj.x = 200;
 obj.y = 250;
@@ -18,12 +18,18 @@ obj.sy = 1;
 obj.dir = 1;
 obj.speed = 100;
 
+//Called when the preloading is done
+love.load = function () {
+	obj.image = love.graphics.newImage("pyramid.png");
+	obj.bounce = love.audio.newSource("bounce.ogg");
+}
+
 //The main updater
 love.update = function (dt) {
 	//Move the pyramid
-	obj.x = obj.x + obj.speed * obj.dir * dt;
+	obj.x += obj.speed * obj.dir * dt;
 
-	//Make him bounce to the walls
+	//Make him bounce off the walls
 	if (obj.x > 800) {
 		obj.dir = -obj.dir;
 		obj.x = 800;
@@ -58,15 +64,16 @@ love.update = function (dt) {
 
 }
 
+//The draw loop
 love.draw = function () {
 	//Set the font
-	love.graphics.setFont(obj.font)
+	love.graphics.setFont(obj.font);
 	//Prevent images of being blurry
 	love.graphics.setDefaultFilter("nearest");
 	//Draw the pyramid
 	love.graphics.draw(obj.image,obj.x,obj.y,obj.r,obj.sx,obj.sy,49,42);
 	//Draw the description
-	love.graphics.print("lovescript Demo v0.01",10,30);
+	love.graphics.printf("l o v e J S     D e m o     v 0 . 0 2",400,30,800,"center");
 	love.graphics.print("A/Up to speed up",10,55);
 	love.graphics.print("S/Down to slow down",10,75);
 	love.graphics.print("Space to invert direction",10,95);
@@ -81,7 +88,7 @@ love.config = function (t) {
 
 //If a key is pressed
 love.keypressed = function (key) {
-	//If the key pressed is space
+	//If the key pressed is spacebar
 	if (key==" ") {
 		//Change the direction of the pyramid
 		obj.dir = - obj.dir;

@@ -1,4 +1,4 @@
-//lovescript
+//loveJS
 //A LÖVE to javascript port
 
 var init = function () {
@@ -13,6 +13,11 @@ var init = function () {
 
 var love = { };
 
+love.init = true;
+
+love._assetsLoaded = 0;
+love._assetsToBeLoaded = 0;
+
 love.timestamp = function () {
 	return window.performance && window.performance.now ? window.performance.now() : new Date().getTime();
 }
@@ -25,11 +30,34 @@ love.time.last = love.timestamp();
 
 love.graphics = {};
 
-love.graphics.color = {r:"FF",g:"FF",b:"FF"};
+love.graphics.images = {};
 
-love.graphics.backgroundColor = {r:"00",g:"00",b:"00"};
+love.graphics.color = {r:255,g:255,b:255,a:255};
+
+love.graphics.backgroundColor = {r:0,g:0,b:0};
 
 love.graphics.pointSize = 1;
+
+love.graphics.fontSize = 10;
+
+love.graphics.defaultFilter = "linear";
+
+love.graphics.font = {};
+
+love.graphics.preload = function (a) {
+	for (var i = 0; i < arguments.length; i++) {
+		var name = arguments[i];
+		var img;
+		img = new Image();
+		img.src = name;
+		img.onload = function(){
+			love._assetsLoaded++;
+		}
+		this.images[name] = img;
+		love._assetsToBeLoaded++;
+		
+	};
+}
 
 
 //Drawing functions
@@ -51,6 +79,12 @@ love.graphics.arc = function (mode,x,y,r,a1,a2) {
 	this.ctx.arc(x,y,Math.abs(r),a1,a2);
 	this.ctx.lineTo(x,y);
 	love.graphics.mode(mode);
+}
+
+love.graphics.clear = function () {
+	this.ctx.fillStyle = this.rgb(this.backgroundColor.r,this.backgroundColor.b,this.backgroundColor.g);
+	this.background();
+	this.ctx.fillStyle = this.rgb(this.color.r,this.color.b,this.color.g);
 }
 
 love.graphics.line = function () {
@@ -91,6 +125,7 @@ love.graphics.polygon = function (mode, verts) {
 }
 
 love.graphics.print = function (t,x,y,r,sx,sy,ox,oy) {
+
 	x = x || 0;
 	y = y || 0;
 	r = r || 0;
@@ -106,88 +141,286 @@ love.graphics.print = function (t,x,y,r,sx,sy,ox,oy) {
 	this.ctx.restore();
 }
 
-love.graphics._draw = function (img,x,y,r,sx,sy,ox,oy) {
+//Note: Doesn't work perfect yet with rotation.
+love.graphics.printf = function (t,x,y,limit,align,r,sx,sy,ox,oy) {
+	x = x || 0;
+	y = y || 0;
+	r = r || 0;
 	sx = sx || 1;
 	sy = sy || 1;
 	ox = ox || 0;
 	oy = oy || 0;
+	this.ctx.textAlign=align;
+	
+	var words = t.split(' ');
+    var line = '';
+	
+	for(var i = 0; i < words.length; i++) {
+      var testLine = line + words[i] + ' ';
+      var metrics = this.ctx.measureText(testLine);
+      var testWidth = metrics.width;
+      if (testWidth > limit && i > 0) {
+      	this.ctx.save();
+		this.ctx.translate(x,y);
+		this.ctx.scale(sx,sy);
+		this.ctx.rotate(r);
+      	this.ctx.fillText(line, -ox,-oy);
+		this.ctx.restore();
 
-	this.ctx.save();
+        line = words[i] + ' ';
+        y += this.fontSize+10*sy;
+      }
+      else {
+        line = testLine;
+      }
+    }
+
+ 	this.ctx.save();
 	this.ctx.translate(x,y);
 	this.ctx.scale(sx,sy);
 	this.ctx.rotate(r);
-	if (img.loaded) {
-		this.ctx.drawImage(img,-ox,-oy);
-	}
+  	this.ctx.fillText(line, -ox,-oy);
 	this.ctx.restore();
-
+	this.ctx.textAlign="left";
 }
 
-love.graphics.draw = function (img,quad,x,y,r,sx,sy,ox,oy) {
-	if (typeof(quad) != "array") {
-		love.graphics._draw(img,quad,x,y,r,sx,sy,ox);
-		return;
+love.graphics._draw = function (img,x,y,r,sx,sy,ox,oy,kx,ky,quad) {
+	if (x == null) {
+		x = 0;
 	}
-	sx = sx || 1;
-	sy = sy || 1;
-	ox = ox || 0;
-	oy = oy || 0;
+	if (y == null) {
+		y = 0;
+	}
+	if (r == null) {
+		r = 0;
+	}
+	if (sx == null) {
+		sx = 1;
+	}
+	if (sy == null) {
+		sy = sx;
+	}
+	if (ox == null) {
+		ox = 0;
+	}
+	if (oy == null) {
+		oy = 0;
+	}
+	if (kx == null) {
+		kx = 0;
+	}
+	if (ky == null) {
+		ky = 0;
+	}
 
+	if (img.filter != "default") {
+		this.ctx.imageSmoothingEnabled = img.filter == "linear";
+	}
+	else {
+		this.ctx.imageSmoothingEnabled = this.defaultFilter;
+	}
 	this.ctx.save();
+	this.ctx.transform(1,ky,kx,1,0,0);
 	this.ctx.translate(x,y);
 	this.ctx.scale(sx,sy);
 	this.ctx.rotate(r);
-	if (img.loaded) {
-		this.ctx.drawImage(img,quad.sx,quad.sy,quad.sw,quad.sh,-ox,-oy,quad.sw,quad.sh);
+	if (quad) {
+		this.ctx.drawImage(love.graphics.images[img.url],quad.viewport.sx,quad.viewport.sy,quad.viewport.sw,quad.viewport.sh,-ox,-oy,quad.viewport.sw,quad.viewport.sh);
+	}
+	else{
+		this.ctx.drawImage(love.graphics.images[img.url],-ox,-oy);
 	}
 	this.ctx.restore();
+	this.ctx.imageSmoothingEnabled = this.defaultFilter == "linear";
+}
+
+love.graphics.draw = function (img,quad,x,y,r,sx,sy,ox,oy,kx,ky) {
+	if (typeof(quad) != "object") {
+		love.graphics._draw(img,quad,x,y,r,sx,sy,ox,oy,kx,ky);
+	}
+	else{
+		love.graphics._draw(img,x,y,r,sx,sy,ox,oy,kx,ky,quad);
+	}
 }
 
 
 
 //New functions
-
 love.graphics.newImage = function (url) {
-	var img = new Image();
-	img.src = url;
-	img.onload = function(){
-		this.loaded = true;
+	var img;
+	img = {};
+	img.url = url;
+	img.filter = "default";
+	img.wrap = "clamp"
+
+	img.typeOf = function (type) {
+		return type == "Object" || type == "Drawable" || type == "Texture" || type == "Image";
+	}
+
+	img.type = function () {
+		return "Image";
+	}
+
+	img.getFilter = function () {
+		return (this.filter=="default") ? love.graphics.defaultFilter : this.filter;
+	}
+	
+	img.getDimensions = function () {
+		return [this.width,this.height];
+	}
+
+	img.getWidth = function () {
+		return this.width;
+	}
+
+	img.getHeight = function () {
+		return this.height;
+	}
+
+	img.getWrap = function () {
+		return this.wrap;
+	}
+
+	img.getData = function () {
+
+	}
+
+	img.setFilter = function (filter) {
+		switch (filter) {
+			case "nearest":
+			    this.filter = "nearest";
+			    break;
+			case "linear":
+			    this.filter = "linear";
+			    break;
+			case null:
+				this.filter = "default";
+				break;
+			default:
+				throw("Invalid filter mode: " + filter)
+				break;
+		}
+	}
+
+	img.setWrap = function (wrap) {
+		switch (wrap) {
+			case "clamp":
+			    this.wrap = "clamp";
+			    break;
+			case "repeat":
+			    this.wrap = "repeat";
+			    break;
+			case null:
+				this.wrap = "clamp";
+				break;
+			default:
+				throw("Invalid filter mode: " + filter)
+				break;
+		}
 	}
 
 	return img;
 }
 
+
 love.graphics.newQuad = function (x,y,w,h,sw,sh,adw,adh) {
-	return {sx:x,sy:y,sw:w,sh:h};
+	var quad = {};
+	quad.viewport = {sx:x,sy:y,sw:w,sh:h}
+
+	quad.typeOf = function (type) {
+		return type == "Object" || type == "Quad";
+	}
+
+	quad.type = function () {
+		return "Quad";
+	}
+
+	quad.getViewport = function () {
+		return [this.viewport.sx,this.viewport.sy,this.viewport.sw,this.viewport.sh];
+	}
+
+	quad.setViewport = function (x,y,w,h) {
+		this.viewport = {sx:x,sy:y,sw:w,sh:h};
+	}
+	return quad;
 }
 
-love.graphics.newFont = function (font,size) {
-	return 'normal ' + size + 'px ' + font;
-}
 
+love.graphics.newFont = function (fnt,size) {
+	font = {};
+	font.size = size;
+	font.name = fnt;
+	font.filter = "default";
+
+	font.typeOf = function (type) {
+		return type == "Object" || type == "Font";
+	}
+
+	font.type = function () {
+		return "Font";
+	}
+
+	font.getFilter = function () {
+		return (this.filter=="default") ? love.graphics.defaultFilter : this.filter;
+	}
+
+	font.setFilter = function (filter) {
+		switch (filter) {
+			case "nearest":
+			    this.filter = "nearest";
+			    break;
+			case "linear":
+			    this.filter = "linear";
+			    break;
+			case null:
+				this.filter = "default";
+				break;
+			default:
+				throw("Invalid filter mode: " + filter)
+				break;
+		}
+	}
+
+	return font;
+}
 
 
 //Set functions
 
-love.graphics.setDefaultFilter = function (a) {
-	this.ctx.imageSmoothingEnabled = a == "linear";
+love.graphics.setDefaultFilter = function (filter) {
+	switch (filter) {
+	case "nearest":
+	    this.defaultFilter = "nearest";
+	    break;
+	case "linear":
+	    this.defaultFilter = "linear";
+	    break;
+	default:
+		throw("Invalid filter mode: " + filter)
+		break;
+	}
+	this.ctx.imageSmoothingEnabled = this.defaultFilter == "linear";
 }
 
+
 love.graphics.setColor = function (r,g,b,a) {
-	this.color.r = r.toString(16);
-	this.color.g = g.toString(16);
-	this.color.b = b.toString(16);
-	if (this.color.r.length == 1){
-		this.color.r = this.color.r + '0';
+	//TODO: Accept arrays
+	if (typeof(r)=="object") {
+		this.color.r = r[0] || this.color.r;
+		this.color.g = g[0] || this.color.g;
+		this.color.b = b[0] || this.color.b;
+		this.color.a = a[0] || this.color.a;
 	}
-	if (this.color.g.length == 1){
-		this.color.g = this.color.g + '0';
+	else {
+		this.color.r = r;
+		this.color.g = g;
+		this.color.b = b;
+		this.color.a = a;
 	}
-	if (this.color.b.length == 1){
-		this.color.b = this.color.b + '0';
-	}
-	this.ctx.fillStyle='#' + this.color.r + this.color.g + this.color.b;
-	this.ctx.strokeStyle='#' + this.color.r + this.color.g + this.color.b;
+	
+	
+	this.ctx.fillStyle = this.rgb(r,g,b);
+	this.ctx.strokeStyle = this.rgb(r,g,b);
 	love.graphics.ctx.globalAlpha = a/255;
 }
 
@@ -204,8 +437,6 @@ love.graphics.setBackgroundColor = function (r,g,b) {
 	if (this.backgroundColor.b.length == 1){
 		this.backgroundColor.b = this.backgroundColor.b + '0';
 	}
-	this.ctx.fillStyle='#' + this.backgroundColor.r + this.backgroundColor.g + this.backgroundColor.b;
-	this.ctx.strokeStyle='#' + this.backgroundColor.r + this.backgroundColor.g + this.backgroundColor.b;
 }
 
 love.graphics.setLineWidth = function (s) {
@@ -216,8 +447,9 @@ love.graphics.setPointSize = function (s) {
 	this.pointSize = s;
 }
 
-love.graphics.setFont = function (font) {
-	this.ctx.font = font;
+love.graphics.setFont = function (fnt) {
+	this.font = fnt;
+	this.ctx.font = this.font.size + "pt " + this.font.name
 }
 
 love.graphics.setBlendMode = function (mode) {
@@ -236,7 +468,7 @@ love.graphics.getDefaultFilter = function () {
 }
 
 love.graphics.getColor = function () {
-	return [parseInt(this.color.r,16),parseInt(this.color.g,16),parseInt(this.color.b,16)];
+	return [this.color.r,this.color,g,this.color.b,this.color.a];
 }
 
 love.graphics.getBackgroundColor = function () {
@@ -252,12 +484,16 @@ love.graphics.getPointSize = function () {
 }
 
 love.graphics.getFont = function () {
-	return this.ctx.font;
+	return this.font;
 }
 
 
 
 //Coordinate System
+love.graphics.origin = function () {
+	this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
 love.graphics.translate = function (x,y) {
 	this.ctx.translate(x,y);
 }
@@ -303,38 +539,59 @@ love.graphics.background = function () {
 	this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
 }
 
+love.graphics.rgb = function (r,g,b) {
+	var x = ((r << 16) | (g << 8) | b).toString(16);
+	return "#000000".substring(0, 7 - x.length) + x;
+}
+
 
 
 //Audio
 
 love.audio = {};
 
+love.audio.sources = {};
+
 love.masterVolume = {};
+
+love.audio.preload = function () {
+	for (var i = 0; i < arguments.length; i++) {
+		var name = arguments[i];
+		var source;
+		source = new Audio();
+		source.src = name;
+		source.oncanplaythrough = function(){
+			love._assetsLoaded++;
+		}
+		love.audio.sources[name] = source;
+		love._assetsToBeLoaded++;
+	};
+}
 
 //Recorder functions
 love.audio.play = function (audio) {
-	audio.play();
+	this.sources[audio.url].play()
 	audio.stop = false;
 	audio.playing = true;
 }
 
 love.audio.stop = function (audio) {
-	audio.pause();
+	this.sources[audio.url].pause()
 	audio.stopped = true;
-	audio.currentTime = 0;
+	this.sources[audio.url].currentTime = 0;
 }
 
 love.audio.rewind = function (audio) {
-	audio.currentTime = 0;
+	this.sources[audio.url].currentTime = 0;
 }
 
 love.audio.pause = function (audio) {
-	audio.pause();
+	this.sources[audio.url].pause()
 }
 
 love.audio.resume = function (audio) {
-	if (audio.currentTime>0) {
-		audio.play();
+	if (this.sources[audio.url].currentTime > 0) {
+		this.sources[audio.url].play();
 		audio.playing = true;
 	}
 }
@@ -342,72 +599,72 @@ love.audio.resume = function (audio) {
 
 //New functions
 love.audio.newSource = function (url) {
-	var audio = new Audio(url);
 
-	audio.stopped = false;
-	audio.playing = false;
+	var source;
+	source = {};
+	source.url = url;
 
-	audio.doPlay = audio.play;
+	source.stopped = false;
+	source.playing = false;
 
-	audio.play = function () {
-		audio.doPlay();
-		audio.stop = false;
-		audio.playing = true;
+
+	source.play = function () {
+		love.audio.sources[source.url].play();
+		source.stop = false;
+		source.playing = true;
 	}
 
-	audio.getVolume = function () {
-		return audio.volume;
+	source.getVolume = function () {
+		return source.volume;
 	}
 
-	audio.setVolume = function (v) {
-		audio.volume = v;
+	source.setVolume = function (volume) {
+		source.volume = volume;
 	}
 
-	audio.isLooping = function () {
-		return audio.loop;
+	source.isLooping = function () {
+		return source.loop;
 	}
 
-	audio.setLooping = function (v) {
-		audio.loop = v;
+	source.setLooping = function (loop) {
+		source.loop = loop;
 	}
 
-	audio.isPlaying = function () {
-		return audio.playing;
+	source.isPlaying = function () {
+		return source.playing;
 	}
 
-	audio.isPaused = function () {
-		return audio.paused;
+	source.isPaused = function () {
+		return source.paused;
 	}
 
-	audio.isStopped = function () {
-		return audio.stopped;
+	source.isStopped = function () {
+		return source.stopped;
 	}
 
-	audio.stop = function () {
-		audio.pause();
-		audio.stop = true;
-		audio.currentTime = 0;
+	source.stop = function () {
+		source.pause();
+		source.stop = true;
+		source.currentTime = 0;
 	}
 
-	audio.setPitch = function (v) {
-		audio.playbackRate = v;
+	source.setPitch = function (pitch) {
+		source.playbackRate = pitch;
 	}
 
-	audio.getPtich = function () {
-		return audio.playbackRate;
+	source.getPtich = function () {
+		return source.playbackRate;
 	}
 
-	audio.seek = function (v) {
-		audio.currentTime = v;
+	source.seek = function (position) {
+		source.currentTime = position;
 	}
 
-	audio.tell = function () {
-		return audio.currentTime;
+	source.tell = function () {
+		return source.currentTime;
 	}
 
-
-
-	return audio;
+	return source;
 }
 
 
@@ -417,43 +674,82 @@ love.audio.newSource = function (url) {
 love.keyboard = {}
 
 love.keyboard.constant = {
-	27:"escape",
-	9:"tab",
-	20:"capslock",
-	8:"backspace",
-	13:"return",
-	16:"shift",
-	17:"control",
-	18:"lalt",
-	225:"ralt",
-	91:"lgui",
-	92:"rgui",
-	219:"[",
-	221:"]",
-	220:"\\",
-	186:";",
-	222:"'",
-	189:"-",
-	187:"=",
-	192:"`",
-	188:",",
-	190:".",
-	191:"/",
-	37:"left",
-	38:"up",
-	39:"right",
-	40:"down"
+	8: "backspace",
+	9: "tab",
+	13: "return",
+	16: "shift",
+	17: "ctrl",
+	18: "alt",
+	19: "pause",
+	20: "capslock",
+	27: "escape",
+	33: "pageup",
+	34: "pagedown",
+	35: "end",
+	36: "home",
+	45: "insert",
+	46: "delete",
+	37: "left",
+	38: "up",
+	39: "right",
+	40: "down",
+	91: "lmeta",
+	92: "rmeta",
+	93: "mode",
+	96: "kp0",
+	97: "kp1",
+	98: "kp2",
+	99: "kp3",
+	100: "kp4",
+	101: "kp5",
+	102: "kp6",
+	103: "kp7",
+	104: "kp8",
+	105: "kp9",
+	106: "kp*",
+	107: "kp+",
+	109: "kp-",
+	110: "kp.",
+	111: "kp/",
+	112: "f1",
+	113: "f2",
+	114: "f3",
+	115: "f4",
+	116: "f5",
+	117: "f6",
+	118: "f7",
+	119: "f8",
+	120: "f9",
+	121: "f10",
+	122: "f11",
+	123: "f12",
+	144: "numlock",
+	145: "scrolllock",
+	186: ",",
+	187: "=",
+	188: ",",
+	189: "-",
+	190: ".",
+	191: "/",
+	192: "`",
+	219: "[",
+	220: "\\",
+	221: "]",
+	222: "'"
 };
 
 love.keyboard.keysDown = [];
 
 keyDownHandler = function(event) {
 	var keyPressed = love.keyboard.constant[event.keyCode] || String.fromCharCode(event.keyCode).toLowerCase();
-	
-	love.keyboard.keysDown[keyPressed] = true;
-	if (love.keypressed) {
-		love.keypressed(keyPressed);
+	if (!love.keyboard.keysDown[keyPressed]) {
+		if (love.keypressed) {
+			love.keypressed(keyPressed);
+		}
 	}
+
+	love.keyboard.keysDown[keyPressed] = true;
+	
 }
 
 keyUpHandler = function(event) {
@@ -529,48 +825,58 @@ love.mouse.isDown = function () {
 
 
 love.run = function () {
-	window.requestAnimFrame = (function() {
-		var firstFrameTime = Date.now(),
-		frameDuration = 1000/60;
-
-		function myRequestAnimationFrame(callback) {
-			var now = Date.now()
-			nextFrameTime = Math.ceil((now - firstFrameTime) / frameDuration) * frameDuration,
-			setTimeout(callback, now - nextFrameTime);
+		window.requestAnimFrame = (function(){
+		return  window.requestAnimationFrame   ||  //Chromium 
+			window.webkitRequestAnimationFrame ||  //Webkit
+			window.mozRequestAnimationFrame    || //Mozilla Geko
+			window.oRequestAnimationFrame      || //Opera Presto
+			window.msRequestAnimationFrame     || //IE Trident?
+			function(callback, element){ //Fallback function
+				window.setTimeout(callback, 1000/60);                
+			}
+		})();
+		
+		window.cancelAnimFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+	
+	if (love._assetsLoaded == love._assetsToBeLoaded) {
+		if (love.graphics.ctx) {
+			love.graphics.imageSmoothingEnabled = true;
+			love.graphics.ctx.strokeStyle = love.graphics.rgb(255,255,255);
+			if (love.config) {
+				love.config(love.graphics.canvas);
+			}
+			love.load();
+			love.loop(0);
+			window.cancelAnimFrame(love.run);
 		}
-	 
-    	return myRequestAnimationFrame;
-	})();
-    if (love.graphics.ctx) {
-    	if (love.config) {
-    		love.config(love.graphics.canvas);
-    	}
-
-		love.loop(true);
-    }
-    else {
+		else {
+			window.requestAnimFrame(love.run);
+		}
+	}
+	else {
 		window.requestAnimFrame(love.run);
-    }
+	}
 }
 
-love.loop = function (a) {
-	window.requestAnimFrame(love.loop);
-	love.time.now = love.timestamp();
-	love.time.dt = (love.time.now-love.time.last) / 1000;
-	love.update(love.time.dt);
-	love.graphics.drawloop();
-	love.time.last = love.time.now;
 
+love.loop = function (time) {
+	love.time.dt = (time - love.time.last) / 1000;
+	love.update((love.time.dt > 0) ? love.time.dt : 1/60);
+	love.graphics.drawloop();
+	love.time.last = time;
+	window.requestAnimFrame(love.loop);
 }
 
 love.graphics.drawloop = function (a) {
 	this.clearScreen();
 	this.ctx.save();
-	this.ctx.fillStyle='#' + this.backgroundColor.r + this.backgroundColor.g + this.backgroundColor.b;
+	this.ctx.fillStyle = this.rgb(this.backgroundColor.r,this.backgroundColor.g,this.backgroundColor.b);
 	this.background();
-	this.ctx.fillStyle='#' + this.color.r + this.color.g + this.color.b;
+	this.ctx.fillStyle = this.rgb(this.color.r,this.color.g,this.color.b);
+	this.ctx.strokeStyle = this.rgb(this.color.r,this.color.g,this.color.b);
 	love.draw();
 	this.ctx.restore();
 }
+
 
 window.addEventListener('load', init);

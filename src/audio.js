@@ -2,32 +2,48 @@
 
 love.audio = {};
 
+love.audio.sources = {};
+
 love.masterVolume = {};
+
+love.audio.preload = function () {
+	for (var i = 0; i < arguments.length; i++) {
+		var name = arguments[i];
+		var source;
+		source = new Audio();
+		source.src = name;
+		source.oncanplaythrough = function(){
+			love._assetsLoaded++;
+		}
+		love.audio.sources[name] = source;
+		love._assetsToBeLoaded++;
+	};
+}
 
 //Recorder functions
 love.audio.play = function (audio) {
-	audio.play();
+	this.sources[audio.url].play()
 	audio.stop = false;
 	audio.playing = true;
 }
 
 love.audio.stop = function (audio) {
-	audio.pause();
+	this.sources[audio.url].pause()
 	audio.stopped = true;
-	audio.currentTime = 0;
+	this.sources[audio.url].currentTime = 0;
 }
 
 love.audio.rewind = function (audio) {
-	audio.currentTime = 0;
+	this.sources[audio.url].currentTime = 0;
 }
 
 love.audio.pause = function (audio) {
-	audio.pause();
+	this.sources[audio.url].pause()
 }
 
 love.audio.resume = function (audio) {
-	if (audio.currentTime>0) {
-		audio.play();
+	if (this.sources[audio.url].currentTime > 0) {
+		this.sources[audio.url].play();
 		audio.playing = true;
 	}
 }
@@ -35,70 +51,70 @@ love.audio.resume = function (audio) {
 
 //New functions
 love.audio.newSource = function (url) {
-	var audio = new Audio(url);
 
-	audio.stopped = false;
-	audio.playing = false;
+	var source;
+	source = {};
+	source.url = url;
 
-	audio.doPlay = audio.play;
+	source.stopped = false;
+	source.playing = false;
 
-	audio.play = function () {
-		audio.doPlay();
-		audio.stop = false;
-		audio.playing = true;
+
+	source.play = function () {
+		love.audio.sources[source.url].play();
+		source.stop = false;
+		source.playing = true;
 	}
 
-	audio.getVolume = function () {
-		return audio.volume;
+	source.getVolume = function () {
+		return source.volume;
 	}
 
-	audio.setVolume = function (v) {
-		audio.volume = v;
+	source.setVolume = function (volume) {
+		source.volume = volume;
 	}
 
-	audio.isLooping = function () {
-		return audio.loop;
+	source.isLooping = function () {
+		return source.loop;
 	}
 
-	audio.setLooping = function (v) {
-		audio.loop = v;
+	source.setLooping = function (loop) {
+		source.loop = loop;
 	}
 
-	audio.isPlaying = function () {
-		return audio.playing;
+	source.isPlaying = function () {
+		return source.playing;
 	}
 
-	audio.isPaused = function () {
-		return audio.paused;
+	source.isPaused = function () {
+		return source.paused;
 	}
 
-	audio.isStopped = function () {
-		return audio.stopped;
+	source.isStopped = function () {
+		return source.stopped;
 	}
 
-	audio.stop = function () {
-		audio.pause();
-		audio.stop = true;
-		audio.currentTime = 0;
+	source.stop = function () {
+		source.pause();
+		source.stop = true;
+		source.currentTime = 0;
 	}
 
-	audio.setPitch = function (v) {
-		audio.playbackRate = v;
+	source.setPitch = function (pitch) {
+		source.playbackRate = pitch;
 	}
 
-	audio.getPtich = function () {
-		return audio.playbackRate;
+	source.getPtich = function () {
+		return source.playbackRate;
 	}
 
-	audio.seek = function (v) {
-		audio.currentTime = v;
+	source.seek = function (position) {
+		source.currentTime = position;
 	}
 
-	audio.tell = function () {
-		return audio.currentTime;
+	source.tell = function () {
+		return source.currentTime;
 	}
 
-
-
-	return audio;
+	return source;
 }

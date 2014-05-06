@@ -1,4 +1,4 @@
-lovescript
+loveJS
 =============
 
 A copy of the LÖVE API into javascript.
@@ -37,14 +37,28 @@ Usage
 Put this in your main.js
 
 ```javascript
+//Preload images here
+love.graphics.preload();
+
+//Preload audio here
+love.audio.preload();
+
+//Called when preloading is done
+love.load = function () {
+    
+}
+
+//The main updater
 love.update = function (dt) {
 
 }
 
+//The draw loop
 love.draw = function () {
 	
 }
 
+//Configure canvas width and height
 love.config = function (t) {
 	t.width = 800;
 	t.height = 600;
@@ -54,13 +68,18 @@ love.config = function (t) {
 love.run();
 ```
 
+Look in the example folder for a better explanation.
+
+
 Modules
 -----------------
 All the modules and their functions that are currently implemented. If a module/function is not here, it's not available (yet).
 
 
-
 ## Graphics
+
+####preload( url )
+*Note: Custom function, use it to preload images*
 
 ####arc( mode, x, y, radius, angle1, angle2 )
 *Note: Missing segments*
@@ -68,35 +87,66 @@ All the modules and their functions that are currently implemented. If a module/
 ####circle( mode, x, y, radius )
 *Note: Missing segments*
 
-####draw( drawable [, quad ], x, y, r, sx, sy, ox, oy )
-
+####clear( )
+####draw( drawable [, quad ], x, y, r, sx, sy, ox, oy, kx, ky )
 ####line( x1, y1, x2, y2, ... ) or line( [x,y,x,y,x,y...] )
-
 ####point( x, y )
-
 ####polygon( mode, [x,y,x,y,x,y...] )
-####print( text, x, y, r, sx, sy, ox, oy )
+####print( text, x, y, r, sx, sy, ox, oy, kx, ky )
 ####rectangle( mode, x, y, w, h )
-####newFont( font, size )
-*Note: Font needs to be loaded in html, you only give the name here.*
-####newImage( filename )
+
+####newImage( file )
 *Note: There is no imageData*
+
+####image.type( )
+####image.typeOf( )
+####image.getFilter( )
+*Note: See [setDefaultFilter()](https://github.com/DaanHaaz/lovescript#setdefaultfilter-filter-)*
+####image.getWrap( )
+####image.getDimensions( )
+####image.getWidth( )
+####image.getHeight( )
+####image.setFilter( )
+*Note: See [setDefaultFilter()](https://github.com/DaanHaaz/lovescript#setdefaultfilter-filter-)*
+####image.setWrap( wrap )
+
+
 ####newQuad( x, y, width, height )
 *Note: Missing reference width/height*
+
+####quad.type( )
+####quad.typeOf( )
+####quad.getViewport( )
+####quad.setViewport( x,y,w,h )
 
 ####getBlendMode( )
 ####getColor( )
 ####getDefaultFilter( )
-*Note: See setDefaultFilter()*
+*Note: See [setDefaultFilter()](https://github.com/DaanHaaz/lovescript#setdefaultfilter-filter-)*
+
+####newFont( font, size )
+*Note: Font needs to be loaded in html, you only give the name here.*
+
+####font.type( )
+####font.typeOf( type )
+####font.getFilter( )
+*Note: See [setDefaultFilter()](https://github.com/DaanHaaz/lovescript#setdefaultfilter-filter-)*
+####font.setFilter( filter )
+*Note: See [setDefaultFilter()](https://github.com/DaanHaaz/lovescript#setdefaultfilter-filter-)*
+
 ####getFont( )
 ####getPointSize( )
+####getLineWidth( )
 ####setBackgroundColor( r, g, b )
 ####setBlendMode( mode )
 *Note: Works only with html5 canvas blend modes*
+
 ####setColor( r, g, b, a )
 *Note: Doesn't work with images*
+
 ####setDefaultFilter( filter )
 *Note: Cannot filter scaling up and down separately, missing anisotropy
+
 ####setFont( font )
 ####setLineWidth( width )
 ####setPointSize( size )
@@ -109,27 +159,32 @@ All the modules and their functions that are currently implemented. If a module/
 
 ## Audio
 *Note: Everything in seconds unit*
+
 ####newSource( file )
 *Note: Missing static*
-####Source.getPitch( )
-####Source.getVolume( )
-####Source.isLooping( )
-####Source.isPaused( )
-####Source.isPlaying( )
-####Source.isStopped( )
-####Source.pause( )
-####Source.play( )
-####Source.resume( )
-####Source.rewind( )
-####Source.seek( offset )
-####Source.setLooping( loop )
-####Source.setPitch( pitch )
-####Source.setVolume( volume )
-####Source.stop( )
-####Source.tell( )
+
+####source.type( )
+####source.typeOf( )
+####source.getPitch( )
+####source.getVolume( )
+####source.isLooping( )
+####source.isPaused( )
+####source.isPlaying( )
+####source.isStopped( )
+####source.pause( )
+####source.play( )
+####source.resume( )
+####source.rewind( )
+####source.seek( offset )
+####source.setLooping( loop )
+####source.setPitch( pitch )
+####source.setVolume( volume )
+####source.stop( )
+####source.tell( )
 
 ####pause( source )
 *Note: No arguments does not make all audio pause, stop, rewind or resume.
+
 ####play( source )
 ####resume( source )
 ####rewind( source )
@@ -139,6 +194,7 @@ All the modules and their functions that are currently implemented. If a module/
 ####isDown( key, ... )
 ####keypressed( key )
 *Note: Missing isrepeat*
+
 ####keyreleased( key )
 
 ##Mouse
@@ -150,4 +206,4 @@ All the modules and their functions that are currently implemented. If a module/
 
 License
 -----
-lovescript is released under the [MIT License](http://opensource.org/licenses/MIT)
+loveJS is released under the [MIT License](http://opensource.org/licenses/MIT)
