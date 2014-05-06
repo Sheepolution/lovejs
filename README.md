@@ -119,11 +119,6 @@ All the modules and their functions that are currently implemented. If a module/
 ####quad.getViewport( )
 ####quad.setViewport( x,y,w,h )
 
-####getBlendMode( )
-####getColor( )
-####getDefaultFilter( )
-*Note: See [setDefaultFilter()](https://github.com/DaanHaaz/lovescript#setdefaultfilter-filter-)*
-
 ####newFont( font, size )
 *Note: Font needs to be loaded in html, you only give the name here.*
 
@@ -137,6 +132,10 @@ All the modules and their functions that are currently implemented. If a module/
 ####getFont( )
 ####getPointSize( )
 ####getLineWidth( )
+####getBlendMode( )
+####getColor( )
+####getDefaultFilter( )
+*Note: See [setDefaultFilter()](https://github.com/DaanHaaz/lovescript#setdefaultfilter-filter-)*
 ####setBackgroundColor( r, g, b )
 ####setBlendMode( mode )
 *Note: Works only with html5 canvas blend modes*
