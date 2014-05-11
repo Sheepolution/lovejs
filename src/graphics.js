@@ -203,10 +203,10 @@ love.graphics._draw = function (img,x,y,r,sx,sy,ox,oy,kx,ky,quad) {
 	this.ctx.scale(sx,sy);
 	this.ctx.rotate(r);
 	if (quad) {
-		this.ctx.drawImage(love.graphics.images[img.url],quad.viewport.sx,quad.viewport.sy,quad.viewport.sw,quad.viewport.sh,-ox,-oy,quad.viewport.sw,quad.viewport.sh);
+		this.ctx.drawImage(img.drawable,quad.viewport.sx,quad.viewport.sy,quad.viewport.sw,quad.viewport.sh,-ox,-oy,quad.viewport.sw,quad.viewport.sh);
 	}
 	else{
-		this.ctx.drawImage(img.canvas,-ox,-oy);
+		this.ctx.drawImage(img.drawable,-ox,-oy);
 	}
 	this.ctx.restore();
 	this.ctx.imageSmoothingEnabled = this.defaultFilter == "linear";
@@ -227,6 +227,7 @@ love.graphics.draw = function (img,quad,x,y,r,sx,sy,ox,oy,kx,ky) {
 love.graphics.newImage = function (url) {
 	var img;
 	img = {};
+	img.drawable = this.images[url].cloneNode(false);
 	img.url = url;
 	img.filter = "default";
 	img.wrap = "clamp"
@@ -244,15 +245,15 @@ love.graphics.newImage = function (url) {
 	}
 	
 	img.getDimensions = function () {
-		return [this.width,this.height];
+		return [this.drawable.width,this.drawable.height];
 	}
 
 	img.getWidth = function () {
-		return this.width;
+		return love.graphics.images[this.url].width;
 	}
 
 	img.getHeight = function () {
-		return this.height;
+		return love.graphics.images[this.url].width;
 	}
 
 	img.getWrap = function () {
@@ -363,35 +364,39 @@ love.graphics.newFont = function (fnt,size) {
 }
 
 love.graphics.newCanvas = function (w,h) {
-	var cvs;
-	cvs = {};
-	cvs.canvas = document.createElement('canvas');
-	cvs.context = cvs.canvas.getContext('2d');
-	cvs.filter = "linear";
-	cvs.canvas.width = w || this.canvas.width;
-	cvs.canvas.height = h || this.canvas.height;
+	var canvas;
+	canvas = {};
+	canvas.drawable = document.createElement('canvas');
+	canvas.context = canvas.drawable.getContext('2d');
+	canvas.filter = "linear";
+	canvas.drawable.width = w || this.drawable.width;
+	canvas.drawable.height = h || this.drawable.height;
 
-	cvs.type = function () {
+	canvas.type = function () {
 		return "Canvas";
 	}
 
-	cvs.typeOf = function (type) {
-		return type = "Object" || "Drawable" || "Texture" || "Canvas";
+	canvas.typeOf = function (type) {
+		return type == "Object" || type == "Drawable" || type == "Texture" || type == "Canvas";
 	}
 
-	cvs.getWidth = function () {
-		return this.canvas.width;
+	canvas.getWidth = function () {
+		return this.drawable.width;
 	}
 
-	cvs.getHeight = function () {
-		return this.canvas.width;
+	canvas.getHeight = function () {
+		return this.drawable.height;
 	}
 
-	cvs.getFilter = function () {
+	canvas.getWidth = function () {
+		return [this.drawable.width,this.drawable.height];
+	}
+
+	canvas.getFilter = function () {
 		return this.filter;
 	}
 
-	cvs.setFilter = function (filter) {
+	canvas.setFilter = function (filter) {
 		switch (filter) {
 			case "nearest":
 			    this.filter = "nearest";
@@ -408,7 +413,7 @@ love.graphics.newCanvas = function (w,h) {
 		}
 	}
 
-	return cvs
+	return canvas
 }
 
 
@@ -492,7 +497,7 @@ love.graphics.setCanvas = function (cvs) {
 	}
 	else{
 		this.ctx = cvs.context;
-		this.canvas = cvs.canvas;
+		this.canvas = cvs.drawable;
 		this.cvs = cvs;
 	}
 }

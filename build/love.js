@@ -3,6 +3,7 @@
 
 var init = function () {
 	love.graphics.canvas=document.getElementById('canvas');
+	love.graphics.defaultCanvas = love.graphics.canvas;
 	document.addEventListener("keydown",keyDownHandler, false);
 	document.addEventListener("keyup",keyUpHandler, false);
 	document.addEventListener("mousemove",mouseMove, false);
@@ -32,6 +33,10 @@ love.time.last = love.timestamp();
 love.graphics = {};
 
 love.graphics.defaultCtx;
+
+love.graphics.defaultCanvas;
+
+love.graphics.cvs;
 
 love.graphics.images = {};
 
@@ -228,10 +233,10 @@ love.graphics._draw = function (img,x,y,r,sx,sy,ox,oy,kx,ky,quad) {
 	this.ctx.scale(sx,sy);
 	this.ctx.rotate(r);
 	if (quad) {
-		this.ctx.drawImage(love.graphics.images[img.url],quad.viewport.sx,quad.viewport.sy,quad.viewport.sw,quad.viewport.sh,-ox,-oy,quad.viewport.sw,quad.viewport.sh);
+		this.ctx.drawImage(img.drawable,quad.viewport.sx,quad.viewport.sy,quad.viewport.sw,quad.viewport.sh,-ox,-oy,quad.viewport.sw,quad.viewport.sh);
 	}
 	else{
-		this.ctx.drawImage(img.canvas,-ox,-oy);
+		this.ctx.drawImage(img.drawable,-ox,-oy);
 	}
 	this.ctx.restore();
 	this.ctx.imageSmoothingEnabled = this.defaultFilter == "linear";
@@ -252,6 +257,7 @@ love.graphics.draw = function (img,quad,x,y,r,sx,sy,ox,oy,kx,ky) {
 love.graphics.newImage = function (url) {
 	var img;
 	img = {};
+	img.drawable = this.images[url].cloneNode(false);
 	img.url = url;
 	img.filter = "default";
 	img.wrap = "clamp"
@@ -269,15 +275,15 @@ love.graphics.newImage = function (url) {
 	}
 	
 	img.getDimensions = function () {
-		return [this.width,this.height];
+		return [this.drawable.width,this.drawable.height];
 	}
 
 	img.getWidth = function () {
-		return this.width;
+		return love.graphics.images[this.url].width;
 	}
 
 	img.getHeight = function () {
-		return this.height;
+		return love.graphics.images[this.url].width;
 	}
 
 	img.getWrap = function () {
@@ -388,35 +394,39 @@ love.graphics.newFont = function (fnt,size) {
 }
 
 love.graphics.newCanvas = function (w,h) {
-	var cvs;
-	cvs = {};
-	cvs.canvas = document.createElement('canvas');
-	cvs.context = cvs.canvas.getContext('2d');
-	cvs.filter = "linear";
-	cvs.canvas.width = w || this.canvas.width;
-	cvs.canvas.height = h || this.canvas.height;
+	var canvas;
+	canvas = {};
+	canvas.drawable = document.createElement('canvas');
+	canvas.context = canvas.drawable.getContext('2d');
+	canvas.filter = "linear";
+	canvas.drawable.width = w || this.drawable.width;
+	canvas.drawable.height = h || this.drawable.height;
 
-	cvs.type = function () {
+	canvas.type = function () {
 		return "Canvas";
 	}
 
-	cvs.typeOf = function (type) {
-		return type = "Object" || "Drawable" || "Texture" || "Canvas";
+	canvas.typeOf = function (type) {
+		return type == "Object" || type == "Drawable" || type == "Texture" || type == "Canvas";
 	}
 
-	cvs.getWidth = function () {
-		return this.canvas.width;
+	canvas.getWidth = function () {
+		return this.drawable.width;
 	}
 
-	cvs.getHeight = function () {
-		return this.canvas.width;
+	canvas.getHeight = function () {
+		return this.drawable.height;
 	}
 
-	cvs.getFilter = function () {
+	canvas.getWidth = function () {
+		return [this.drawable.width,this.drawable.height];
+	}
+
+	canvas.getFilter = function () {
 		return this.filter;
 	}
 
-	cvs.setFilter = function (filter) {
+	canvas.setFilter = function (filter) {
 		switch (filter) {
 			case "nearest":
 			    this.filter = "nearest";
@@ -433,7 +443,7 @@ love.graphics.newCanvas = function (w,h) {
 		}
 	}
 
-	return cvs
+	return canvas
 }
 
 
@@ -511,9 +521,14 @@ love.graphics.setBlendMode = function (mode) {
 love.graphics.setCanvas = function (cvs) {
 	if (cvs==null) {
 		this.ctx = this.defaultCtx;
+		this.canvas = this.defaultCanvas;
+		this.cvs = null;
+
 	}
 	else{
 		this.ctx = cvs.context;
+		this.canvas = cvs.drawable;
+		this.cvs = cvs;
 	}
 }
 
@@ -548,7 +563,21 @@ love.graphics.getFont = function () {
 	return this.font;
 }
 
+love.graphics.getCanvas = function () {
+	return this.cvs;
+}
 
+love.graphics.getWidth = function () {
+	return this.canvas.width;
+}
+
+love.graphics.getHeight = function () {
+	return this.canvas.height;
+}
+
+love.graphics.getDimensions = function () {
+	return [this.canvas.width,this.canvas.height];
+}
 
 //Coordinate System
 love.graphics.origin = function () {
@@ -630,30 +659,32 @@ love.audio.preload = function () {
 }
 
 //Recorder functions
-love.audio.play = function (audio) {
-	this.sources[audio.url].play()
-	audio.stop = false;
-	audio.playing = true;
+love.audio.play = function (source) {
+	source.audio.play()
+	source.stopped = false;
+	source.playing = true;
 }
 
-love.audio.stop = function (audio) {
-	this.sources[audio.url].pause()
-	audio.stopped = true;
-	this.sources[audio.url].currentTime = 0;
+love.audio.stop = function (source) {
+	source.audio.pause()
+	source.stopped = true;
+	source.playing = false;
+	source.audio.currentTime = 0;
 }
 
-love.audio.rewind = function (audio) {
-	this.sources[audio.url].currentTime = 0;
+love.audio.rewind = function (source) {
+	source.audio.currentTime = 0;
 }
 
-love.audio.pause = function (audio) {
-	this.sources[audio.url].pause()
+love.audio.pause = function (source) {
+	source.audio.pause()
+	source.playing = false;
 }
 
-love.audio.resume = function (audio) {
-	if (this.sources[audio.url].currentTime > 0) {
-		this.sources[audio.url].play();
-		audio.playing = true;
+love.audio.resume = function (source) {
+	if (source.audio.currentTime > 0) {
+		source.audio.play();
+		source.playing = true;
 	}
 }
 
@@ -663,66 +694,90 @@ love.audio.newSource = function (url) {
 
 	var source;
 	source = {};
-	source.url = url;
+	source.audio = new Audio();
+	source.audio.src = url;
 
 	source.stopped = false;
 	source.playing = false;
 
+	source.type = function () {
+		return "Source";
+	}
+
+	source.typeOf = function (type) {
+		return type == "Object" || type == "Source";
+	}
 
 	source.play = function () {
-		love.audio.sources[source.url].play();
-		source.stop = false;
-		source.playing = true;
-	}
-
-	source.getVolume = function () {
-		return source.volume;
-	}
-
-	source.setVolume = function (volume) {
-		source.volume = volume;
-	}
-
-	source.isLooping = function () {
-		return source.loop;
-	}
-
-	source.setLooping = function (loop) {
-		source.loop = loop;
-	}
-
-	source.isPlaying = function () {
-		return source.playing;
-	}
-
-	source.isPaused = function () {
-		return source.paused;
-	}
-
-	source.isStopped = function () {
-		return source.stopped;
+		this.audio.play();
+		this.stopped = false;
+		this.playing = true;
 	}
 
 	source.stop = function () {
-		source.pause();
-		source.stop = true;
-		source.currentTime = 0;
+		this.audio.pause();
+		this.stopped = true;
+		this.audio.currentTime = 0;
+	}
+
+	source.pause = function () {
+		this.audio.pause();
+		this.audio.playing = false;
+	}
+
+	source.resume = function () {
+		if (this.audio.currentTime>0) {
+			this.audio.play();
+			this.playing = true;
+		}
+	}
+
+	source.rewind = function () {
+		this.audio.currentTime = 0;
+	}
+
+	source.getVolume = function () {
+		return this.audio.volume;
+	}
+
+	source.setVolume = function (volume) {
+		this.audio.volume = volume;
+	}
+
+	source.isLooping = function () {
+		return this.audio.loop;
+	}
+
+	source.setLooping = function (loop) {
+		this.audio.loop = loop;
+	}
+
+	source.isPlaying = function () {
+		return this.audio.playing;
+	}
+
+	source.isPaused = function () {
+		return this.audio.paused;
+	}
+
+	source.isStopped = function () {
+		return this.stopped;
 	}
 
 	source.setPitch = function (pitch) {
-		source.playbackRate = pitch;
+		this.audio.playbackRate = pitch;
 	}
 
 	source.getPtich = function () {
-		return source.playbackRate;
+		return this.audio.playbackRate;
 	}
 
 	source.seek = function (position) {
-		source.currentTime = position;
+		this.audio.currentTime = position;
 	}
 
 	source.tell = function () {
-		return source.currentTime;
+		return this.audio.currentTime;
 	}
 
 	return source;
@@ -885,6 +940,7 @@ love.mouse.isDown = function () {
 }
 
 
+//Run
 love.run = function () {
 		window.requestAnimFrame = (function(){
 		return  window.requestAnimationFrame   ||  //Chromium 
@@ -919,7 +975,6 @@ love.run = function () {
 		window.requestAnimFrame(love.run);
 	}
 }
-
 
 love.loop = function (time) {
 	love.time.dt = (time - love.time.last) / 1000;

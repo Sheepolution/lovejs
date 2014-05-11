@@ -21,30 +21,32 @@ love.audio.preload = function () {
 }
 
 //Recorder functions
-love.audio.play = function (audio) {
-	this.sources[audio.url].play()
-	audio.stop = false;
-	audio.playing = true;
+love.audio.play = function (source) {
+	source.audio.play()
+	source.stopped = false;
+	source.playing = true;
 }
 
-love.audio.stop = function (audio) {
-	this.sources[audio.url].pause()
-	audio.stopped = true;
-	this.sources[audio.url].currentTime = 0;
+love.audio.stop = function (source) {
+	source.audio.pause()
+	source.stopped = true;
+	source.playing = false;
+	source.audio.currentTime = 0;
 }
 
-love.audio.rewind = function (audio) {
-	this.sources[audio.url].currentTime = 0;
+love.audio.rewind = function (source) {
+	source.audio.currentTime = 0;
 }
 
-love.audio.pause = function (audio) {
-	this.sources[audio.url].pause()
+love.audio.pause = function (source) {
+	source.audio.pause()
+	source.playing = false;
 }
 
-love.audio.resume = function (audio) {
-	if (this.sources[audio.url].currentTime > 0) {
-		this.sources[audio.url].play();
-		audio.playing = true;
+love.audio.resume = function (source) {
+	if (source.audio.currentTime > 0) {
+		source.audio.play();
+		source.playing = true;
 	}
 }
 
@@ -54,66 +56,90 @@ love.audio.newSource = function (url) {
 
 	var source;
 	source = {};
-	source.url = url;
+	source.audio = new Audio();
+	source.audio.src = url;
 
 	source.stopped = false;
 	source.playing = false;
 
+	source.type = function () {
+		return "Source";
+	}
+
+	source.typeOf = function (type) {
+		return type == "Object" || type == "Source";
+	}
 
 	source.play = function () {
-		love.audio.sources[source.url].play();
-		source.stop = false;
-		source.playing = true;
-	}
-
-	source.getVolume = function () {
-		return source.volume;
-	}
-
-	source.setVolume = function (volume) {
-		source.volume = volume;
-	}
-
-	source.isLooping = function () {
-		return source.loop;
-	}
-
-	source.setLooping = function (loop) {
-		source.loop = loop;
-	}
-
-	source.isPlaying = function () {
-		return source.playing;
-	}
-
-	source.isPaused = function () {
-		return source.paused;
-	}
-
-	source.isStopped = function () {
-		return source.stopped;
+		this.audio.play();
+		this.stopped = false;
+		this.playing = true;
 	}
 
 	source.stop = function () {
-		source.pause();
-		source.stop = true;
-		source.currentTime = 0;
+		this.audio.pause();
+		this.stopped = true;
+		this.audio.currentTime = 0;
+	}
+
+	source.pause = function () {
+		this.audio.pause();
+		this.audio.playing = false;
+	}
+
+	source.resume = function () {
+		if (this.audio.currentTime>0) {
+			this.audio.play();
+			this.playing = true;
+		}
+	}
+
+	source.rewind = function () {
+		this.audio.currentTime = 0;
+	}
+
+	source.getVolume = function () {
+		return this.audio.volume;
+	}
+
+	source.setVolume = function (volume) {
+		this.audio.volume = volume;
+	}
+
+	source.isLooping = function () {
+		return this.audio.loop;
+	}
+
+	source.setLooping = function (loop) {
+		this.audio.loop = loop;
+	}
+
+	source.isPlaying = function () {
+		return this.audio.playing;
+	}
+
+	source.isPaused = function () {
+		return this.audio.paused;
+	}
+
+	source.isStopped = function () {
+		return this.stopped;
 	}
 
 	source.setPitch = function (pitch) {
-		source.playbackRate = pitch;
+		this.audio.playbackRate = pitch;
 	}
 
 	source.getPtich = function () {
-		return source.playbackRate;
+		return this.audio.playbackRate;
 	}
 
 	source.seek = function (position) {
-		source.currentTime = position;
+		this.audio.currentTime = position;
 	}
 
 	source.tell = function () {
-		return source.currentTime;
+		return this.audio.currentTime;
 	}
 
 	return source;
