@@ -15,11 +15,12 @@ love.run = function () {
 	
 	if (love._assetsLoaded == love._assetsToBeLoaded) {
 		if (love.graphics.ctx) {
-			love.graphics.imageSmoothingEnabled = true;
-			love.graphics.ctx.strokeStyle = love.graphics.rgb(255,255,255);
 			if (love.config) {
 				love.config(love.graphics.canvas);
 			}
+			love.graphics.imageSmoothingEnabled = true;
+			love.graphics.ctx.strokeStyle = love.graphics.rgb(255,255,255);
+			love.graphics.setFont(love.graphics.newFont("arial",10))
 			love.load();
 			love.loop(0);
 			window.cancelAnimFrame(love.run);
@@ -49,6 +50,7 @@ love.graphics.drawloop = function (a) {
 	this.background();
 	this.ctx.fillStyle = this.rgb(this.color.r,this.color.g,this.color.b);
 	this.ctx.strokeStyle = this.rgb(this.color.r,this.color.g,this.color.b);
+	this.ctx.globalAlpha = this.color.a/255;
 	love.draw();
 	this.ctx.restore();
 }

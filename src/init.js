@@ -3,15 +3,19 @@
 
 var init = function () {
 	love.graphics.canvas=document.getElementById('canvas');
+	love.graphics.defaultCanvas = love.graphics.canvas;
 	document.addEventListener("keydown",keyDownHandler, false);
 	document.addEventListener("keyup",keyUpHandler, false);
 	document.addEventListener("mousemove",mouseMove, false);
 	document.addEventListener("mousedown",mouseDownHandler, false);
 	document.addEventListener("mouseup",mouseUpHandler, false);
 	love.graphics.ctx=love.graphics.canvas.getContext('2d');
+	love.graphics.defaultCtx = love.graphics.ctx;
 }
 
 var love = { };
+
+love.init = true;
 
 love._assetsLoaded = 0;
 love._assetsToBeLoaded = 0;

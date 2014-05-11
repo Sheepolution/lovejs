@@ -93,6 +93,7 @@ All the modules and their functions that are currently implemented. If a module/
 ####point( x, y )
 ####polygon( mode, [x,y,x,y,x,y...] )
 ####print( text, x, y, r, sx, sy, ox, oy, kx, ky )
+####printf( text, x, y, limit, align, r, sx, sy, ox, oy, kx, ky )
 ####rectangle( mode, x, y, w, h )
 
 ####newImage( file )
@@ -129,11 +130,20 @@ All the modules and their functions that are currently implemented. If a module/
 ####font.setFilter( filter )
 *Note: See [setDefaultFilter()](https://github.com/DaanHaaz/lovescript#setdefaultfilter-filter-)*
 
+####newCanvas( w, h)
+####canvas:type()
+####canvas:typeOf( type )
+####canvas:getWidth( )
+####canvas:getHeight( )
+####canvas:getFilter( )
+####canvas:setFilter( )
+
 ####getFont( )
 ####getPointSize( )
 ####getLineWidth( )
 ####getBlendMode( )
 ####getColor( )
+####getCanvas( )
 ####getDefaultFilter( )
 *Note: See [setDefaultFilter()](https://github.com/DaanHaaz/lovescript#setdefaultfilter-filter-)*
 ####setBackgroundColor( r, g, b )
@@ -149,12 +159,17 @@ All the modules and their functions that are currently implemented. If a module/
 ####setFont( font )
 ####setLineWidth( width )
 ####setPointSize( size )
+####setCanvas( canvas )
 ####pop( )
 ####push( )
 ####rotate( )
 ####scale( )
 ####shear( )
 ####translate( )
+
+####getWidth( )
+####getHeight( )
+####getDimensions( )
 
 ## Audio
 *Note: Everything in seconds unit*

@@ -1,5 +1,5 @@
 //loveJS
-//A LÖVE to javascript port
+//A copy of the LÖVE API for Javascript
 
 var init = function () {
 	love.graphics.canvas=document.getElementById('canvas');
@@ -9,6 +9,7 @@ var init = function () {
 	document.addEventListener("mousedown",mouseDownHandler, false);
 	document.addEventListener("mouseup",mouseUpHandler, false);
 	love.graphics.ctx=love.graphics.canvas.getContext('2d');
+	love.graphics.defaultCtx = love.graphics.ctx;
 }
 
 var love = { };
@@ -29,6 +30,8 @@ love.time.last = love.timestamp();
 //Graphics
 
 love.graphics = {};
+
+love.graphics.defaultCtx;
 
 love.graphics.images = {};
 
@@ -228,7 +231,7 @@ love.graphics._draw = function (img,x,y,r,sx,sy,ox,oy,kx,ky,quad) {
 		this.ctx.drawImage(love.graphics.images[img.url],quad.viewport.sx,quad.viewport.sy,quad.viewport.sw,quad.viewport.sh,-ox,-oy,quad.viewport.sw,quad.viewport.sh);
 	}
 	else{
-		this.ctx.drawImage(love.graphics.images[img.url],-ox,-oy);
+		this.ctx.drawImage(img.canvas,-ox,-oy);
 	}
 	this.ctx.restore();
 	this.ctx.imageSmoothingEnabled = this.defaultFilter == "linear";
@@ -384,6 +387,55 @@ love.graphics.newFont = function (fnt,size) {
 	return font;
 }
 
+love.graphics.newCanvas = function (w,h) {
+	var cvs;
+	cvs = {};
+	cvs.canvas = document.createElement('canvas');
+	cvs.context = cvs.canvas.getContext('2d');
+	cvs.filter = "linear";
+	cvs.canvas.width = w || this.canvas.width;
+	cvs.canvas.height = h || this.canvas.height;
+
+	cvs.type = function () {
+		return "Canvas";
+	}
+
+	cvs.typeOf = function (type) {
+		return type = "Object" || "Drawable" || "Texture" || "Canvas";
+	}
+
+	cvs.getWidth = function () {
+		return this.canvas.width;
+	}
+
+	cvs.getHeight = function () {
+		return this.canvas.width;
+	}
+
+	cvs.getFilter = function () {
+		return this.filter;
+	}
+
+	cvs.setFilter = function (filter) {
+		switch (filter) {
+			case "nearest":
+			    this.filter = "nearest";
+			    break;
+			case "linear":
+			    this.filter = "linear";
+			    break;
+			case null:
+				this.filter = "default";
+				break;
+			default:
+				throw("Invalid filter mode: " + filter)
+				break;
+		}
+	}
+
+	return cvs
+}
+
 
 //Set functions
 
@@ -407,9 +459,9 @@ love.graphics.setColor = function (r,g,b,a) {
 	//TODO: Accept arrays
 	if (typeof(r)=="object") {
 		this.color.r = r[0] || this.color.r;
-		this.color.g = g[0] || this.color.g;
-		this.color.b = b[0] || this.color.b;
-		this.color.a = a[0] || this.color.a;
+		this.color.g = g[1] || this.color.g;
+		this.color.b = b[2] || this.color.b;
+		this.color.a = a[3] || this.color.a;
 	}
 	else {
 		this.color.r = r;
@@ -421,7 +473,7 @@ love.graphics.setColor = function (r,g,b,a) {
 	
 	this.ctx.fillStyle = this.rgb(r,g,b);
 	this.ctx.strokeStyle = this.rgb(r,g,b);
-	love.graphics.ctx.globalAlpha = a/255;
+	this.ctx.globalAlpha = a/255;
 }
 
 love.graphics.setBackgroundColor = function (r,g,b) {
@@ -454,6 +506,15 @@ love.graphics.setFont = function (fnt) {
 
 love.graphics.setBlendMode = function (mode) {
 	this.ctx.globalCompositeOperation = mode;
+}
+
+love.graphics.setCanvas = function (cvs) {
+	if (cvs==null) {
+		this.ctx = this.defaultCtx;
+	}
+	else{
+		this.ctx = cvs.context;
+	}
 }
 
 
@@ -840,11 +901,12 @@ love.run = function () {
 	
 	if (love._assetsLoaded == love._assetsToBeLoaded) {
 		if (love.graphics.ctx) {
-			love.graphics.imageSmoothingEnabled = true;
-			love.graphics.ctx.strokeStyle = love.graphics.rgb(255,255,255);
 			if (love.config) {
 				love.config(love.graphics.canvas);
 			}
+			love.graphics.imageSmoothingEnabled = true;
+			love.graphics.ctx.strokeStyle = love.graphics.rgb(255,255,255);
+			love.graphics.setFont(love.graphics.newFont("arial",10))
 			love.load();
 			love.loop(0);
 			window.cancelAnimFrame(love.run);
@@ -874,6 +936,7 @@ love.graphics.drawloop = function (a) {
 	this.background();
 	this.ctx.fillStyle = this.rgb(this.color.r,this.color.g,this.color.b);
 	this.ctx.strokeStyle = this.rgb(this.color.r,this.color.g,this.color.b);
+	this.ctx.globalAlpha = this.color.a/255;
 	love.draw();
 	this.ctx.restore();
 }
