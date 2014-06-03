@@ -1,4 +1,3 @@
-//Run
 love.run = function () {
 		window.requestAnimFrame = (function(){
 		return  window.requestAnimationFrame   ||  //Chromium 
@@ -33,7 +32,6 @@ love.run = function () {
 		window.requestAnimFrame(love.run);
 	}
 }
-
 
 love.loop = function (time) {
 	love.time.dt = (time - love.time.last) / 1000;

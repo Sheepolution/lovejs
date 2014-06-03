@@ -9,19 +9,20 @@ love.mouse.y = 0;
 
 love.mouse.constant = {
 	0:"l",
-	1:"m"
+	1:"m",
+	2:"r"
 };
 
 mouseMove = function (event) {
-	love.mouse.x = event.clientX;
-	love.mouse.y = event.clientY;
+	love.mouse.x = event.offsetX;
+	love.mouse.y = event.offsetY;
 }
 
 mouseDownHandler = function (event) {
 	var mousepressed = love.mouse.constant[event.button];
 	love.mouse.buttonsDown[mousepressed] = true;
 	if (love.mousepressed) {
-		love.mousepressed(event.clientX,event.clientY,mousepressed);
+		love.mousepressed(event.offsetX,event.offsetY,mousepressed);
 	}
 }
 
@@ -29,7 +30,7 @@ mouseUpHandler = function (event) {
 	var mousereleased = love.mouse.constant[event.button];
 	love.mouse.buttonsDown[mousereleased] = false;
 	if (love.mousereleased) {
-		love.mousereleased(event.clientX,event.clientY,mousereleased);
+		love.mousereleased(event.offsetX,event.offsetY,mousereleased);
 	}
 }
 

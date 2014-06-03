@@ -1,5 +1,5 @@
 //loveJS
-//A LÖVE to javascript port
+//A copy of the LÖVE API for Javascript
 
 var init = function () {
 	love.graphics.canvas=document.getElementById('canvas');
