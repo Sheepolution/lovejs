@@ -107,3 +107,4 @@ love.mousepressed = function (x,y,button) {
 
 //Initialize love
 love.run();
+

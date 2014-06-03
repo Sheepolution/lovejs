@@ -71,6 +71,7 @@ love.graphics.preload = function (a) {
 //Drawing functions
 
 love.graphics.rectangle = function (mode,x,y,w,h) {
+	this.ctx.beginPath();
 	this.ctx.fillRect(x,y,w,h);
 	love.graphics.mode(mode);
 }
@@ -79,6 +80,7 @@ love.graphics.circle = function (mode,x,y,r) {
 	this.ctx.beginPath();
 	this.ctx.arc(x,y,Math.abs(r),0,2*Math.PI);
 	love.graphics.mode(mode)
+
 }
 
 love.graphics.arc = function (mode,x,y,r,a1,a2) {
@@ -225,7 +227,7 @@ love.graphics._draw = function (img,x,y,r,sx,sy,ox,oy,kx,ky,quad) {
 		this.ctx.imageSmoothingEnabled = img.filter == "linear";
 	}
 	else {
-		this.ctx.imageSmoothingEnabled = this.defaultFilter;
+		this.ctx.imageSmoothingEnabled = this.defaultFilter == "linear";
 	}
 	this.ctx.save();
 	this.ctx.transform(1,ky,kx,1,0,0);
@@ -487,18 +489,17 @@ love.graphics.setColor = function (r,g,b,a) {
 }
 
 love.graphics.setBackgroundColor = function (r,g,b) {
-	this.backgroundColor.r = r.toString(16);
-	this.backgroundColor.g = g.toString(16);
-	this.backgroundColor.b = b.toString(16);
-	if (this.backgroundColor.r.length == 1){
-		this.backgroundColor.r = this.backgroundColor.r + '0';
+	if (typeof(r)=="object") {
+		this.backgroundColor.r = r[0] || this.backgroundColor.r;
+		this.backgroundColor.g = g[1] || this.backgroundColor.g;
+		this.backgroundColor.b = b[2] || this.backgroundColor.b;
 	}
-	if (this.backgroundColor.g.length == 1){
-		this.backgroundColor.g = this.backgroundColor.g + '0';
+	else {
+		this.backgroundColor.r = r;
+		this.backgroundColor.g = g;
+		this.backgroundColor.b = b;
 	}
-	if (this.backgroundColor.b.length == 1){
-		this.backgroundColor.b = this.backgroundColor.b + '0';
-	}
+	
 }
 
 love.graphics.setLineWidth = function (s) {
@@ -507,6 +508,10 @@ love.graphics.setLineWidth = function (s) {
 
 love.graphics.setPointSize = function (s) {
 	this.pointSize = s;
+}
+
+love.graphics.setNewFont = function (fnt,size) {
+	this.setFont(this.newFont(fnt,size));
 }
 
 love.graphics.setFont = function (fnt) {
@@ -898,19 +903,20 @@ love.mouse.y = 0;
 
 love.mouse.constant = {
 	0:"l",
-	1:"m"
+	1:"m",
+	2:"r"
 };
 
 mouseMove = function (event) {
-	love.mouse.x = event.clientX;
-	love.mouse.y = event.clientY;
+	love.mouse.x = event.offsetX;
+	love.mouse.y = event.offsetY;
 }
 
 mouseDownHandler = function (event) {
 	var mousepressed = love.mouse.constant[event.button];
 	love.mouse.buttonsDown[mousepressed] = true;
 	if (love.mousepressed) {
-		love.mousepressed(event.clientX,event.clientY,mousepressed);
+		love.mousepressed(event.offsetX,event.offsetY,mousepressed);
 	}
 }
 
@@ -918,7 +924,7 @@ mouseUpHandler = function (event) {
 	var mousereleased = love.mouse.constant[event.button];
 	love.mouse.buttonsDown[mousereleased] = false;
 	if (love.mousereleased) {
-		love.mousereleased(event.clientX,event.clientY,mousereleased);
+		love.mousereleased(event.offsetX,event.offsetY,mousereleased);
 	}
 }
 

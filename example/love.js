@@ -1,14 +1,16 @@
 //loveJS
-//A LÖVE to javascript port
+//A copy of the LÖVE API for Javascript
 
 var init = function () {
 	love.graphics.canvas=document.getElementById('canvas');
+	love.graphics.defaultCanvas = love.graphics.canvas;
 	document.addEventListener("keydown",keyDownHandler, false);
 	document.addEventListener("keyup",keyUpHandler, false);
 	document.addEventListener("mousemove",mouseMove, false);
 	document.addEventListener("mousedown",mouseDownHandler, false);
 	document.addEventListener("mouseup",mouseUpHandler, false);
 	love.graphics.ctx=love.graphics.canvas.getContext('2d');
+	love.graphics.defaultCtx = love.graphics.ctx;
 }
 
 var love = { };
@@ -29,6 +31,12 @@ love.time.last = love.timestamp();
 //Graphics
 
 love.graphics = {};
+
+love.graphics.defaultCtx;
+
+love.graphics.defaultCanvas;
+
+love.graphics.cvs;
 
 love.graphics.images = {};
 
@@ -63,6 +71,7 @@ love.graphics.preload = function (a) {
 //Drawing functions
 
 love.graphics.rectangle = function (mode,x,y,w,h) {
+	this.ctx.beginPath();
 	this.ctx.fillRect(x,y,w,h);
 	love.graphics.mode(mode);
 }
@@ -71,6 +80,7 @@ love.graphics.circle = function (mode,x,y,r) {
 	this.ctx.beginPath();
 	this.ctx.arc(x,y,Math.abs(r),0,2*Math.PI);
 	love.graphics.mode(mode)
+
 }
 
 love.graphics.arc = function (mode,x,y,r,a1,a2) {
@@ -217,7 +227,7 @@ love.graphics._draw = function (img,x,y,r,sx,sy,ox,oy,kx,ky,quad) {
 		this.ctx.imageSmoothingEnabled = img.filter == "linear";
 	}
 	else {
-		this.ctx.imageSmoothingEnabled = this.defaultFilter;
+		this.ctx.imageSmoothingEnabled = this.defaultFilter == "linear";
 	}
 	this.ctx.save();
 	this.ctx.transform(1,ky,kx,1,0,0);
@@ -225,10 +235,10 @@ love.graphics._draw = function (img,x,y,r,sx,sy,ox,oy,kx,ky,quad) {
 	this.ctx.scale(sx,sy);
 	this.ctx.rotate(r);
 	if (quad) {
-		this.ctx.drawImage(love.graphics.images[img.url],quad.viewport.sx,quad.viewport.sy,quad.viewport.sw,quad.viewport.sh,-ox,-oy,quad.viewport.sw,quad.viewport.sh);
+		this.ctx.drawImage(img.drawable,quad.viewport.sx,quad.viewport.sy,quad.viewport.sw,quad.viewport.sh,-ox,-oy,quad.viewport.sw,quad.viewport.sh);
 	}
 	else{
-		this.ctx.drawImage(love.graphics.images[img.url],-ox,-oy);
+		this.ctx.drawImage(img.drawable,-ox,-oy);
 	}
 	this.ctx.restore();
 	this.ctx.imageSmoothingEnabled = this.defaultFilter == "linear";
@@ -249,6 +259,7 @@ love.graphics.draw = function (img,quad,x,y,r,sx,sy,ox,oy,kx,ky) {
 love.graphics.newImage = function (url) {
 	var img;
 	img = {};
+	img.drawable = this.images[url].cloneNode(false);
 	img.url = url;
 	img.filter = "default";
 	img.wrap = "clamp"
@@ -266,15 +277,15 @@ love.graphics.newImage = function (url) {
 	}
 	
 	img.getDimensions = function () {
-		return [this.width,this.height];
+		return [this.drawable.width,this.drawable.height];
 	}
 
 	img.getWidth = function () {
-		return this.width;
+		return love.graphics.images[this.url].width;
 	}
 
 	img.getHeight = function () {
-		return this.height;
+		return love.graphics.images[this.url].width;
 	}
 
 	img.getWrap = function () {
@@ -384,6 +395,59 @@ love.graphics.newFont = function (fnt,size) {
 	return font;
 }
 
+love.graphics.newCanvas = function (w,h) {
+	var canvas;
+	canvas = {};
+	canvas.drawable = document.createElement('canvas');
+	canvas.context = canvas.drawable.getContext('2d');
+	canvas.filter = "linear";
+	canvas.drawable.width = w || this.drawable.width;
+	canvas.drawable.height = h || this.drawable.height;
+
+	canvas.type = function () {
+		return "Canvas";
+	}
+
+	canvas.typeOf = function (type) {
+		return type == "Object" || type == "Drawable" || type == "Texture" || type == "Canvas";
+	}
+
+	canvas.getWidth = function () {
+		return this.drawable.width;
+	}
+
+	canvas.getHeight = function () {
+		return this.drawable.height;
+	}
+
+	canvas.getWidth = function () {
+		return [this.drawable.width,this.drawable.height];
+	}
+
+	canvas.getFilter = function () {
+		return this.filter;
+	}
+
+	canvas.setFilter = function (filter) {
+		switch (filter) {
+			case "nearest":
+			    this.filter = "nearest";
+			    break;
+			case "linear":
+			    this.filter = "linear";
+			    break;
+			case null:
+				this.filter = "default";
+				break;
+			default:
+				throw("Invalid filter mode: " + filter)
+				break;
+		}
+	}
+
+	return canvas
+}
+
 
 //Set functions
 
@@ -407,9 +471,9 @@ love.graphics.setColor = function (r,g,b,a) {
 	//TODO: Accept arrays
 	if (typeof(r)=="object") {
 		this.color.r = r[0] || this.color.r;
-		this.color.g = g[0] || this.color.g;
-		this.color.b = b[0] || this.color.b;
-		this.color.a = a[0] || this.color.a;
+		this.color.g = g[1] || this.color.g;
+		this.color.b = b[2] || this.color.b;
+		this.color.a = a[3] || this.color.a;
 	}
 	else {
 		this.color.r = r;
@@ -421,22 +485,21 @@ love.graphics.setColor = function (r,g,b,a) {
 	
 	this.ctx.fillStyle = this.rgb(r,g,b);
 	this.ctx.strokeStyle = this.rgb(r,g,b);
-	love.graphics.ctx.globalAlpha = a/255;
+	this.ctx.globalAlpha = a/255;
 }
 
 love.graphics.setBackgroundColor = function (r,g,b) {
-	this.backgroundColor.r = r.toString(16);
-	this.backgroundColor.g = g.toString(16);
-	this.backgroundColor.b = b.toString(16);
-	if (this.backgroundColor.r.length == 1){
-		this.backgroundColor.r = this.backgroundColor.r + '0';
+	if (typeof(r)=="object") {
+		this.backgroundColor.r = r[0] || this.backgroundColor.r;
+		this.backgroundColor.g = g[1] || this.backgroundColor.g;
+		this.backgroundColor.b = b[2] || this.backgroundColor.b;
 	}
-	if (this.backgroundColor.g.length == 1){
-		this.backgroundColor.g = this.backgroundColor.g + '0';
+	else {
+		this.backgroundColor.r = r;
+		this.backgroundColor.g = g;
+		this.backgroundColor.b = b;
 	}
-	if (this.backgroundColor.b.length == 1){
-		this.backgroundColor.b = this.backgroundColor.b + '0';
-	}
+	
 }
 
 love.graphics.setLineWidth = function (s) {
@@ -447,6 +510,10 @@ love.graphics.setPointSize = function (s) {
 	this.pointSize = s;
 }
 
+love.graphics.setNewFont = function (fnt,size) {
+	this.setFont(this.newFont(fnt,size));
+}
+
 love.graphics.setFont = function (fnt) {
 	this.font = fnt;
 	this.ctx.font = this.font.size + "pt " + this.font.name
@@ -454,6 +521,20 @@ love.graphics.setFont = function (fnt) {
 
 love.graphics.setBlendMode = function (mode) {
 	this.ctx.globalCompositeOperation = mode;
+}
+
+love.graphics.setCanvas = function (cvs) {
+	if (cvs==null) {
+		this.ctx = this.defaultCtx;
+		this.canvas = this.defaultCanvas;
+		this.cvs = null;
+
+	}
+	else{
+		this.ctx = cvs.context;
+		this.canvas = cvs.drawable;
+		this.cvs = cvs;
+	}
 }
 
 
@@ -487,7 +568,21 @@ love.graphics.getFont = function () {
 	return this.font;
 }
 
+love.graphics.getCanvas = function () {
+	return this.cvs;
+}
 
+love.graphics.getWidth = function () {
+	return this.canvas.width;
+}
+
+love.graphics.getHeight = function () {
+	return this.canvas.height;
+}
+
+love.graphics.getDimensions = function () {
+	return [this.canvas.width,this.canvas.height];
+}
 
 //Coordinate System
 love.graphics.origin = function () {
@@ -569,30 +664,32 @@ love.audio.preload = function () {
 }
 
 //Recorder functions
-love.audio.play = function (audio) {
-	this.sources[audio.url].play()
-	audio.stop = false;
-	audio.playing = true;
+love.audio.play = function (source) {
+	source.audio.play()
+	source.stopped = false;
+	source.playing = true;
 }
 
-love.audio.stop = function (audio) {
-	this.sources[audio.url].pause()
-	audio.stopped = true;
-	this.sources[audio.url].currentTime = 0;
+love.audio.stop = function (source) {
+	source.audio.pause()
+	source.stopped = true;
+	source.playing = false;
+	source.audio.currentTime = 0;
 }
 
-love.audio.rewind = function (audio) {
-	this.sources[audio.url].currentTime = 0;
+love.audio.rewind = function (source) {
+	source.audio.currentTime = 0;
 }
 
-love.audio.pause = function (audio) {
-	this.sources[audio.url].pause()
+love.audio.pause = function (source) {
+	source.audio.pause()
+	source.playing = false;
 }
 
-love.audio.resume = function (audio) {
-	if (this.sources[audio.url].currentTime > 0) {
-		this.sources[audio.url].play();
-		audio.playing = true;
+love.audio.resume = function (source) {
+	if (source.audio.currentTime > 0) {
+		source.audio.play();
+		source.playing = true;
 	}
 }
 
@@ -602,66 +699,90 @@ love.audio.newSource = function (url) {
 
 	var source;
 	source = {};
-	source.url = url;
+	source.audio = new Audio();
+	source.audio.src = url;
 
 	source.stopped = false;
 	source.playing = false;
 
+	source.type = function () {
+		return "Source";
+	}
+
+	source.typeOf = function (type) {
+		return type == "Object" || type == "Source";
+	}
 
 	source.play = function () {
-		love.audio.sources[source.url].play();
-		source.stop = false;
-		source.playing = true;
-	}
-
-	source.getVolume = function () {
-		return source.volume;
-	}
-
-	source.setVolume = function (volume) {
-		source.volume = volume;
-	}
-
-	source.isLooping = function () {
-		return source.loop;
-	}
-
-	source.setLooping = function (loop) {
-		source.loop = loop;
-	}
-
-	source.isPlaying = function () {
-		return source.playing;
-	}
-
-	source.isPaused = function () {
-		return source.paused;
-	}
-
-	source.isStopped = function () {
-		return source.stopped;
+		this.audio.play();
+		this.stopped = false;
+		this.playing = true;
 	}
 
 	source.stop = function () {
-		source.pause();
-		source.stop = true;
-		source.currentTime = 0;
+		this.audio.pause();
+		this.stopped = true;
+		this.audio.currentTime = 0;
+	}
+
+	source.pause = function () {
+		this.audio.pause();
+		this.audio.playing = false;
+	}
+
+	source.resume = function () {
+		if (this.audio.currentTime>0) {
+			this.audio.play();
+			this.playing = true;
+		}
+	}
+
+	source.rewind = function () {
+		this.audio.currentTime = 0;
+	}
+
+	source.getVolume = function () {
+		return this.audio.volume;
+	}
+
+	source.setVolume = function (volume) {
+		this.audio.volume = volume;
+	}
+
+	source.isLooping = function () {
+		return this.audio.loop;
+	}
+
+	source.setLooping = function (loop) {
+		this.audio.loop = loop;
+	}
+
+	source.isPlaying = function () {
+		return this.audio.playing;
+	}
+
+	source.isPaused = function () {
+		return this.audio.paused;
+	}
+
+	source.isStopped = function () {
+		return this.stopped;
 	}
 
 	source.setPitch = function (pitch) {
-		source.playbackRate = pitch;
+		this.audio.playbackRate = pitch;
 	}
 
 	source.getPtich = function () {
-		return source.playbackRate;
+		return this.audio.playbackRate;
 	}
 
 	source.seek = function (position) {
-		source.currentTime = position;
+		this.audio.currentTime = position;
 	}
 
 	source.tell = function () {
-		return source.currentTime;
+		return this.audio.currentTime;
 	}
 
 	return source;
@@ -782,19 +903,20 @@ love.mouse.y = 0;
 
 love.mouse.constant = {
 	0:"l",
-	1:"m"
+	1:"m",
+	2:"r"
 };
 
 mouseMove = function (event) {
-	love.mouse.x = event.clientX;
-	love.mouse.y = event.clientY;
+	love.mouse.x = event.offsetX;
+	love.mouse.y = event.offsetY;
 }
 
 mouseDownHandler = function (event) {
 	var mousepressed = love.mouse.constant[event.button];
 	love.mouse.buttonsDown[mousepressed] = true;
 	if (love.mousepressed) {
-		love.mousepressed(event.clientX,event.clientY,mousepressed);
+		love.mousepressed(event.offsetX,event.offsetY,mousepressed);
 	}
 }
 
@@ -802,7 +924,7 @@ mouseUpHandler = function (event) {
 	var mousereleased = love.mouse.constant[event.button];
 	love.mouse.buttonsDown[mousereleased] = false;
 	if (love.mousereleased) {
-		love.mousereleased(event.clientX,event.clientY,mousereleased);
+		love.mousereleased(event.offsetX,event.offsetY,mousereleased);
 	}
 }
 
@@ -824,6 +946,7 @@ love.mouse.isDown = function () {
 }
 
 
+//Run
 love.run = function () {
 		window.requestAnimFrame = (function(){
 		return  window.requestAnimationFrame   ||  //Chromium 
@@ -840,11 +963,12 @@ love.run = function () {
 	
 	if (love._assetsLoaded == love._assetsToBeLoaded) {
 		if (love.graphics.ctx) {
-			love.graphics.imageSmoothingEnabled = true;
-			love.graphics.ctx.strokeStyle = love.graphics.rgb(255,255,255);
 			if (love.config) {
 				love.config(love.graphics.canvas);
 			}
+			love.graphics.imageSmoothingEnabled = true;
+			love.graphics.ctx.strokeStyle = love.graphics.rgb(255,255,255);
+			love.graphics.setFont(love.graphics.newFont("arial",10))
 			love.load();
 			love.loop(0);
 			window.cancelAnimFrame(love.run);
@@ -857,7 +981,6 @@ love.run = function () {
 		window.requestAnimFrame(love.run);
 	}
 }
-
 
 love.loop = function (time) {
 	love.time.dt = (time - love.time.last) / 1000;
@@ -874,6 +997,7 @@ love.graphics.drawloop = function (a) {
 	this.background();
 	this.ctx.fillStyle = this.rgb(this.color.r,this.color.g,this.color.b);
 	this.ctx.strokeStyle = this.rgb(this.color.r,this.color.g,this.color.b);
+	this.ctx.globalAlpha = this.color.a/255;
 	love.draw();
 	this.ctx.restore();
 }
