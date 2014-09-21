@@ -13,24 +13,26 @@ love.mouse.constant = {
 	2:"r"
 };
 
-mouseMove = function (event) {
-	love.mouse.x = event.offsetX;
-	love.mouse.y = event.offsetY;
+love.mouse._move = function (event) {
+	love.mouse.x = event.clientX;
+	love.mouse.y = event.clientY;
 }
 
-mouseDownHandler = function (event) {
+love.mouse._downHandler = function (event) {
+	event.preventDefault();
 	var mousepressed = love.mouse.constant[event.button];
 	love.mouse.buttonsDown[mousepressed] = true;
 	if (love.mousepressed) {
-		love.mousepressed(event.offsetX,event.offsetY,mousepressed);
+		love.mousepressed(event.clientX,event.clientY,mousepressed);
 	}
 }
 
-mouseUpHandler = function (event) {
+love.mouse._upHandler = function (event) {
+	event.preventDefault();
 	var mousereleased = love.mouse.constant[event.button];
 	love.mouse.buttonsDown[mousereleased] = false;
 	if (love.mousereleased) {
-		love.mousereleased(event.offsetX,event.offsetY,mousereleased);
+		love.mousereleased(event.clientX,event.clientY,mousereleased);
 	}
 }
 

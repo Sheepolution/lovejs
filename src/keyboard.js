@@ -1,5 +1,6 @@
+//Keyboard
 
-love.keyboard = {}
+love.keyboard = {};
 
 love.keyboard.constant = {
 	8: "backspace",
@@ -68,24 +69,24 @@ love.keyboard.constant = {
 
 love.keyboard.keysDown = [];
 
-keyDownHandler = function(event) {
+love.keyboard._downHandler = function(event) {
+	event.preventDefault();
 	var keyPressed = love.keyboard.constant[event.keyCode] || String.fromCharCode(event.keyCode).toLowerCase();
 	if (!love.keyboard.keysDown[keyPressed]) {
 		if (love.keypressed) {
 			love.keypressed(keyPressed);
 		}
 	}
-
 	love.keyboard.keysDown[keyPressed] = true;
-	
 }
 
-keyUpHandler = function(event) {
+love.keyboard._upHandler = function(event) {
+	event.preventDefault();
 	var keyReleased = love.keyboard.constant[event.keyCode] || String.fromCharCode(event.keyCode).toLowerCase();
-	love.keyboard.keysDown[keyReleased] = false;
 	if (love.keyreleased) {
 		love.keyreleased(keyReleased);
 	}
+	love.keyboard.keysDown[keyReleased] = false;
 }
 
 

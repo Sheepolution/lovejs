@@ -1,27 +1,42 @@
-//Create an object.
-obj = {};
 //Preload the image
-//love.graphics.preload(url);
+//love.graphics.preload(url,url,url,...);
 love.graphics.preload("pyramid.png");
 //Preload the audio
-//love.audio.preload(url);
+//love.audio.preload(url,url,url,...);
 love.audio.preload("bounce.ogg");
-//Get a new font
-//love.graphics.newFont(name,size);
-obj.font = love.graphics.newFont("arial",12);
-//All the other properties
-obj.x = 200;
-obj.y = 250;
-obj.r = 1;
-obj.sx = 1;
-obj.sy = 1;
-obj.dir = 1;
-obj.speed = 100;
+
 
 //Called when the preloading is done
 love.load = function () {
+
+	//Create an object.
+	obj = {};
+
 	obj.image = love.graphics.newImage("pyramid.png");
 	obj.bounce = love.audio.newSource("bounce.ogg");
+
+	//Get a new font
+	//love.graphics.newFont(name,size);
+	obj.font = love.graphics.newFont("arial",12);
+
+	//Check if the file position exists
+	if (love.filesystem.exists("position")) {
+		//If it does exists, restore the saved position
+		var position = love.filesystem.read("position");
+		obj.x = position[0];
+		obj.y = position[1];
+	}
+	else {
+		obj.x = 200;
+		obj.y = 250;
+	}
+
+	//Set all other properties
+	obj.r = 1;
+	obj.sx = 1;
+	obj.sy = 1;
+	obj.dir = 1;
+	obj.speed = 300;
 }
 
 //The main updater
@@ -62,6 +77,8 @@ love.update = function (dt) {
 		obj.speed -= 300 * dt;
 	}
 
+	//Save the position to a file called "position"
+	love.filesystem.write("position",[obj.x,obj.y]);
 }
 
 //The draw loop
@@ -73,7 +90,7 @@ love.draw = function () {
 	//Draw the pyramid
 	love.graphics.draw(obj.image,obj.x,obj.y,obj.r,obj.sx,obj.sy,49,42);
 	//Draw the description
-	love.graphics.printf("l o v e J S     D e m o     v 0 . 0 2",400,30,800,"center");
+	love.graphics.printf("l o v e J S     D e m o     v 0 . 1",400,30,800,"center");
 	love.graphics.print("A/Up to speed up",10,55);
 	love.graphics.print("S/Down to slow down",10,75);
 	love.graphics.print("Space to invert direction",10,95);
@@ -84,6 +101,7 @@ love.config = function (t) {
 	//Set the width/height of the canvas
 	t.width = 800;
 	t.height = 600;
+	t.identity = "example";
 }
 
 //If a key is pressed
@@ -107,4 +125,3 @@ love.mousepressed = function (x,y,button) {
 
 //Initialize love
 love.run();
-

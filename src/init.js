@@ -4,16 +4,16 @@
 var init = function () {
 	love.graphics.canvas=document.getElementById('canvas');
 	love.graphics.defaultCanvas = love.graphics.canvas;
-	document.addEventListener("keydown",keyDownHandler, false);
-	document.addEventListener("keyup",keyUpHandler, false);
-	document.addEventListener("mousemove",mouseMove, false);
-	document.addEventListener("mousedown",mouseDownHandler, false);
-	document.addEventListener("mouseup",mouseUpHandler, false);
+	document.addEventListener("keydown",love.keyboard._downHandler, false);
+	document.addEventListener("keyup",love.keyboard._upHandler, false);
+	document.addEventListener("mousemove",love.mouse._move, false);
+	document.addEventListener("mousedown",love.mouse._downHandler, false);
+	document.addEventListener("mouseup",love.mouse._upHandler, false);
 	love.graphics.ctx=love.graphics.canvas.getContext('2d');
 	love.graphics.defaultCtx = love.graphics.ctx;
 }
 
-var love = { };
+var love = {};
 
 love.init = true;
 

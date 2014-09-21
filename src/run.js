@@ -1,3 +1,5 @@
+//Run
+
 love.run = function () {
 		window.requestAnimFrame = (function(){
 		return  window.requestAnimationFrame   ||  //Chromium 
@@ -15,10 +17,14 @@ love.run = function () {
 	if (love._assetsLoaded == love._assetsToBeLoaded) {
 		if (love.graphics.ctx) {
 			if (love.config) {
-				love.config(love.graphics.canvas);
+				var conf = {};
+				love.config(conf);
+				this.canvas.width = conf.width != null ? conf.width : 800;
+				this.canvas.height = conf.height != null ? conf.height : 600;
+				love.filesystem.identity = typeof(conf.identity) == "string" ? conf.identity + "/" : null;
 			}
 			love.graphics.imageSmoothingEnabled = true;
-			love.graphics.ctx.strokeStyle = love.graphics.rgb(255,255,255);
+			love.graphics.ctx.strokeStyle = love.graphics._rgb(255,255,255);
 			love.graphics.setFont(love.graphics.newFont("arial",10))
 			love.load();
 			love.loop(0);
@@ -35,23 +41,25 @@ love.run = function () {
 
 love.loop = function (time) {
 	love.time.dt = (time - love.time.last) / 1000;
-	love.update((love.time.dt > 0) ? love.time.dt : 1/60);
+	if (love.update) {
+		love.update((love.time.dt > 0) ? love.time.dt : 1/60);
+	}
 	love.graphics.drawloop();
 	love.time.last = time;
 	window.requestAnimFrame(love.loop);
 }
 
 love.graphics.drawloop = function (a) {
-	this.clearScreen();
-	this.ctx.save();
-	this.ctx.fillStyle = this.rgb(this.backgroundColor.r,this.backgroundColor.g,this.backgroundColor.b);
-	this.background();
-	this.ctx.fillStyle = this.rgb(this.color.r,this.color.g,this.color.b);
-	this.ctx.strokeStyle = this.rgb(this.color.r,this.color.g,this.color.b);
-	this.ctx.globalAlpha = this.color.a/255;
-	love.draw();
-	this.ctx.restore();
+	if (love.draw) {
+		this._clearScreen();
+		this.origin();
+		this.ctx.fillStyle = this._rgb(this.backgroundColor.r,this.backgroundColor.g,this.backgroundColor.b);
+		this._background();
+		this.ctx.fillStyle = this._rgb(this.color.r,this.color.g,this.color.b);
+		this.ctx.strokeStyle = this._rgb(this.color.r,this.color.g,this.color.b);
+		this.ctx.globalAlpha = this.color.a/255;
+	 	love.draw();
+	}
 }
-
 
 window.addEventListener('load', init);

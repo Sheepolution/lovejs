@@ -17,18 +17,19 @@ love.audio.preload = function () {
 		}
 		love.audio.sources[name] = source;
 		love._assetsToBeLoaded++;
-	};
+	}
 }
 
 //Recorder functions
+
 love.audio.play = function (source) {
-	source.audio.play()
+	source.audio.play();
 	source.stopped = false;
 	source.playing = true;
 }
 
 love.audio.stop = function (source) {
-	source.audio.pause()
+	source.audio.pause();
 	source.stopped = true;
 	source.playing = false;
 	source.audio.currentTime = 0;
@@ -39,7 +40,7 @@ love.audio.rewind = function (source) {
 }
 
 love.audio.pause = function (source) {
-	source.audio.pause()
+	source.audio.pause();
 	source.playing = false;
 }
 
@@ -50,8 +51,8 @@ love.audio.resume = function (source) {
 	}
 }
 
-
 //New functions
+
 love.audio.newSource = function (url) {
 
 	var source;

@@ -1,56 +1,43 @@
 //Graphics
-
 love.graphics = {};
-
 love.graphics.defaultCtx;
-
 love.graphics.defaultCanvas;
-
 love.graphics.cvs;
-
 love.graphics.images = {};
-
 love.graphics.color = {r:255,g:255,b:255,a:255};
-
 love.graphics.backgroundColor = {r:0,g:0,b:0};
-
 love.graphics.pointSize = 1;
-
 love.graphics.fontSize = 10;
-
 love.graphics.defaultFilter = "linear";
-
 love.graphics.font = {};
 
-love.graphics.preload = function (a) {
+love.graphics.preload = function () {
 	for (var i = 0; i < arguments.length; i++) {
 		var name = arguments[i];
 		var img;
 		img = new Image();
-		img.src = name;
 		img.onload = function(){
 			love._assetsLoaded++;
 		}
+		img.src = name;
 		this.images[name] = img;
 		love._assetsToBeLoaded++;
 		
 	};
 }
 
-
 //Drawing functions
 
 love.graphics.rectangle = function (mode,x,y,w,h) {
 	this.ctx.beginPath();
-	this.ctx.fillRect(x,y,w,h);
-	love.graphics.mode(mode);
+	this.ctx.rect(x,y,w,h);
+	love.graphics._mode(mode);
 }
 
 love.graphics.circle = function (mode,x,y,r) {
 	this.ctx.beginPath();
 	this.ctx.arc(x,y,Math.abs(r),0,2*Math.PI);
-	love.graphics.mode(mode)
-
+	love.graphics._mode(mode)
 }
 
 love.graphics.arc = function (mode,x,y,r,a1,a2) {
@@ -58,18 +45,19 @@ love.graphics.arc = function (mode,x,y,r,a1,a2) {
 	this.ctx.lineTo(x,y);
 	this.ctx.arc(x,y,Math.abs(r),a1,a2);
 	this.ctx.lineTo(x,y);
-	love.graphics.mode(mode);
+	love.graphics._mode(mode);
 }
 
 love.graphics.clear = function () {
-	this.ctx.fillStyle = this.rgb(this.backgroundColor.r,this.backgroundColor.b,this.backgroundColor.g);
-	this.background();
-	this.ctx.fillStyle = this.rgb(this.color.r,this.color.b,this.color.g);
+	this.ctx.fillStyle = this._rgb(this.backgroundColor.r,this.backgroundColor.b,this.backgroundColor.g);
+	this._background();
+	this.ctx.fillStyle = this._rgb(this.color.r,this.color.b,this.color.g);
 }
 
 love.graphics.line = function () {
 	this.ctx.beginPath();
 	if (typeof(arguments[0]) == "object") {
+		var verts = arguments[0];
 		this.ctx.moveTo(verts[0],verts[1]);
 		for (var i = 0; i < verts.length-2; i+=2) {
 			this.ctx.lineTo(verts[i+2],verts[i+3]);
@@ -90,22 +78,22 @@ love.graphics.line = function () {
 love.graphics.point = function (x,y) {
 	this.ctx.beginPath();
 	this.ctx.arc(x,y,Math.abs(this.pointSize),0,2*Math.PI);
-	love.graphics.mode("fill")
+	love.graphics._mode("fill")
 }
 
 love.graphics.polygon = function (mode, verts) {
 	this.ctx.beginPath();
+	var verts = arguments[0];
 	this.ctx.moveTo(verts[0],verts[1]);
 	for (var i = 0; i < verts.length-2; i+=2) {
 		this.ctx.lineTo(verts[i+2],verts[i+3]);
 		this.ctx.stroke();
 	};
 	this.ctx.closePath();
-	love.graphics.mode(mode);
+	love.graphics._mode(mode);
 }
 
 love.graphics.print = function (t,x,y,r,sx,sy,ox,oy) {
-
 	x = x || 0;
 	y = y || 0;
 	r = r || 0;
@@ -117,7 +105,7 @@ love.graphics.print = function (t,x,y,r,sx,sy,ox,oy) {
 	this.ctx.translate(x,y);
 	this.ctx.scale(sx,sy);
 	this.ctx.rotate(r);
-	this.ctx.fillText(t, -ox, -oy);
+	this.ctx.fillText(t, -ox, -oy+this.font.size);
 	this.ctx.restore();
 }
 
@@ -165,39 +153,27 @@ love.graphics.printf = function (t,x,y,limit,align,r,sx,sy,ox,oy) {
 }
 
 love.graphics._draw = function (img,x,y,r,sx,sy,ox,oy,kx,ky,quad) {
-	if (x == null) {
-		x = 0;
-	}
-	if (y == null) {
-		y = 0;
-	}
-	if (r == null) {
-		r = 0;
-	}
-	if (sx == null) {
-		sx = 1;
-	}
-	if (sy == null) {
-		sy = sx;
-	}
-	if (ox == null) {
-		ox = 0;
-	}
-	if (oy == null) {
-		oy = 0;
-	}
-	if (kx == null) {
-		kx = 0;
-	}
-	if (ky == null) {
-		ky = 0;
-	}
+	x = x || 0;
+	y = y || 0;
+	r = r || 0;
+	sx = sx || 1;
+	sy = sy || 1;
+	ox = ox || 0;
+	ox = ox || 0;
+	kx = kx || 0;
+	ky = ky || 0;
 
 	if (img.filter != "default") {
 		this.ctx.imageSmoothingEnabled = img.filter == "linear";
+		this.ctx.mozImageSmoothingEnabled = img.filter == "linear";
+		this.ctx.oImageSmoothingEnabled = img.filter == "linear";;
+		this.ctx.webkitImageSmoothingEnabled = img.filter == "linear";
 	}
 	else {
 		this.ctx.imageSmoothingEnabled = this.defaultFilter == "linear";
+		this.ctx.mozImageSmoothingEnabled = this.defaultFilter == "linear";
+		this.ctx.oImageSmoothingEnabled = this.defaultFilter == "linear";;
+		this.ctx.webkitImageSmoothingEnabled = this.defaultFilter == "linear";
 	}
 	this.ctx.save();
 	this.ctx.transform(1,ky,kx,1,0,0);
@@ -208,7 +184,7 @@ love.graphics._draw = function (img,x,y,r,sx,sy,ox,oy,kx,ky,quad) {
 		this.ctx.drawImage(img.drawable,quad.viewport.sx,quad.viewport.sy,quad.viewport.sw,quad.viewport.sh,-ox,-oy,quad.viewport.sw,quad.viewport.sh);
 	}
 	else{
-		this.ctx.drawImage(img.drawable,-ox,-oy);
+		this.ctx.drawImage(this.images[img.url],-ox,-oy);
 	}
 	this.ctx.restore();
 	this.ctx.imageSmoothingEnabled = this.defaultFilter == "linear";
@@ -223,13 +199,13 @@ love.graphics.draw = function (img,quad,x,y,r,sx,sy,ox,oy,kx,ky) {
 	}
 }
 
-
-
 //New functions
+
 love.graphics.newImage = function (url) {
 	var img;
 	img = {};
-	img.drawable = this.images[url].cloneNode(false);
+	img.drawable = new Image();
+	img.drawable.src = url;
 	img.url = url;
 	img.filter = "default";
 	img.wrap = "clamp"
@@ -303,7 +279,6 @@ love.graphics.newImage = function (url) {
 	return img;
 }
 
-
 love.graphics.newQuad = function (x,y,w,h,sw,sh,adw,adh) {
 	var quad = {};
 	quad.viewport = {sx:x,sy:y,sw:w,sh:h}
@@ -325,7 +300,6 @@ love.graphics.newQuad = function (x,y,w,h,sw,sh,adw,adh) {
 	}
 	return quad;
 }
-
 
 love.graphics.newFont = function (fnt,size) {
 	font = {};
@@ -361,7 +335,6 @@ love.graphics.newFont = function (fnt,size) {
 				break;
 		}
 	}
-
 	return font;
 }
 
@@ -414,10 +387,8 @@ love.graphics.newCanvas = function (w,h) {
 				break;
 		}
 	}
-
 	return canvas
 }
-
 
 //Set functions
 
@@ -434,28 +405,31 @@ love.graphics.setDefaultFilter = function (filter) {
 		break;
 	}
 	this.ctx.imageSmoothingEnabled = this.defaultFilter == "linear";
+	this.ctx.mozImageSmoothingEnabled = this.defaultFilter == "linear";
+	this.ctx.oImageSmoothingEnabled = this.defaultFilter == "linear";;
+	this.ctx.webkitImageSmoothingEnabled = this.defaultFilter == "linear";
 }
 
 
 love.graphics.setColor = function (r,g,b,a) {
-	//TODO: Accept arrays
 	if (typeof(r)=="object") {
 		this.color.r = r[0] || this.color.r;
-		this.color.g = g[1] || this.color.g;
-		this.color.b = b[2] || this.color.b;
-		this.color.a = a[3] || this.color.a;
+		this.color.g = r[1] || this.color.g;
+		this.color.b = r[2] || this.color.b;
+		this.color.a = r[3] || this.color.a;
+		this.ctx.fillStyle = this._rgb(r[0],r[1],r[2]);
+		this.ctx.strokeStyle = this._rgb(r[0],r[1],r[2]);
+		this.ctx.globalAlpha = r[3]/255;
 	}
 	else {
 		this.color.r = r;
 		this.color.g = g;
 		this.color.b = b;
 		this.color.a = a;
+		this.ctx.fillStyle = this._rgb(r,g,b);
+		this.ctx.strokeStyle = this._rgb(r,g,b);
+		this.ctx.globalAlpha = a/255;
 	}
-	
-	
-	this.ctx.fillStyle = this.rgb(r,g,b);
-	this.ctx.strokeStyle = this.rgb(r,g,b);
-	this.ctx.globalAlpha = a/255;
 }
 
 love.graphics.setBackgroundColor = function (r,g,b) {
@@ -469,7 +443,6 @@ love.graphics.setBackgroundColor = function (r,g,b) {
 		this.backgroundColor.g = g;
 		this.backgroundColor.b = b;
 	}
-	
 }
 
 love.graphics.setLineWidth = function (s) {
@@ -498,7 +471,6 @@ love.graphics.setCanvas = function (cvs) {
 		this.ctx = this.defaultCtx;
 		this.canvas = this.defaultCanvas;
 		this.cvs = null;
-
 	}
 	else{
 		this.ctx = cvs.context;
@@ -507,8 +479,21 @@ love.graphics.setCanvas = function (cvs) {
 	}
 }
 
+love.graphics.setScissor = function (x,y,w,h) {
+	if (x == null) {
+		this.ctx.rect(0,0,this.canvas.width,this.canvas.height);
+		this.scissor = null;
+	}
+	this.ctx.save();
+	this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+	this.ctx.rect(x,y,w,h);
+	this.ctx.restore();
+	this.ctx.clip();
+}
+
 
 //Get functions
+
 love.graphics.getDefaultFilter = function () {
 	if (this.ctx.imageSmoothingEnabled) {
 		return "linear";
@@ -534,6 +519,10 @@ love.graphics.getPointSize = function () {
 	return this.pointsize;
 }
 
+love.graphics.getScissor = function () {
+	return this.scissor;
+}
+
 love.graphics.getFont = function () {
 	return this.font;
 }
@@ -555,6 +544,7 @@ love.graphics.getDimensions = function () {
 }
 
 //Coordinate System
+
 love.graphics.origin = function () {
 	this.ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
@@ -568,7 +558,10 @@ love.graphics.rotate = function (r) {
 }
 
 love.graphics.scale = function (sx,sy) {
-	this.ctx.scale(sx,sy)
+	if (!sy) {
+		sy = sx;
+	}
+	this.ctx.scale(sx,sy);
 }
 
 love.graphics.shear = function (kx,ky) {
@@ -583,11 +576,9 @@ love.graphics.pop = function () {
 	this.ctx.restore();
 }
 
-
-
 //Utils
 
-love.graphics.mode = function (mode) {
+love.graphics._mode = function (mode) {
 	if (mode=="fill") {
 		this.ctx.fill();
 	}
@@ -596,15 +587,15 @@ love.graphics.mode = function (mode) {
 	}
 }
 
-love.graphics.clearScreen = function () {
+love.graphics._clearScreen = function () {
 	this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
 }
 
-love.graphics.background = function () {
+love.graphics._background = function () {
 	this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
 }
 
-love.graphics.rgb = function (r,g,b) {
+love.graphics._rgb = function (r,g,b) {
 	var x = ((r << 16) | (g << 8) | b).toString(16);
 	return "#000000".substring(0, 7 - x.length) + x;
 }
