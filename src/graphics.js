@@ -157,9 +157,9 @@ love.graphics._draw = function (img,x,y,r,sx,sy,ox,oy,kx,ky,quad) {
 	y = y || 0;
 	r = r || 0;
 	sx = sx || 1;
-	sy = sy || 1;
+	sy = sy || sx;
 	ox = ox || 0;
-	ox = ox || 0;
+	oy = oy || 0;
 	kx = kx || 0;
 	ky = ky || 0;
 
