@@ -1,7 +1,7 @@
 //Keyboard
 
 love.keyboard = {};
-
+love.keyboard.keysDown = {};
 love.keyboard.constant = {
 	8: "backspace",
 	9: "tab",
@@ -66,8 +66,6 @@ love.keyboard.constant = {
 	221: "]",
 	222: "'"
 };
-
-love.keyboard.keysDown = [];
 
 love.keyboard._downHandler = function(event) {
 	event.preventDefault();

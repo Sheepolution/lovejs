@@ -1,6 +1,5 @@
 //loveJS
 //A copy of the LÖVE API for Javascript
-
 var init = function () {
 	love.graphics.canvas=document.getElementById('canvas');
 	love.graphics.defaultCanvas = love.graphics.canvas;
@@ -9,6 +8,7 @@ var init = function () {
 	document.addEventListener("mousemove",love.mouse._move, false);
 	document.addEventListener("mousedown",love.mouse._downHandler, false);
 	document.addEventListener("mouseup",love.mouse._upHandler, false);
+	document.addEventListener("mousewheel",love.mouse._wheelHandler, false);
 	love.graphics.ctx=love.graphics.canvas.getContext('2d');
 	love.graphics.defaultCtx = love.graphics.ctx;
 }
@@ -44,6 +44,7 @@ love.graphics.fontSize = 10;
 love.graphics.defaultFilter = "linear";
 love.graphics.font = {};
 
+
 love.graphics.preload = function () {
 	for (var i = 0; i < arguments.length; i++) {
 		var name = arguments[i];
@@ -65,12 +66,35 @@ love.graphics.rectangle = function (mode,x,y,w,h) {
 	this.ctx.beginPath();
 	this.ctx.rect(x,y,w,h);
 	love.graphics._mode(mode);
+	this.ctx.closePath();
+}
+
+love.graphics.roundRect = function (mode,x,y,w,h,r) {
+	// r = Math.min(r,w/4,h/4);
+	r*=Math.min(w/25,h/25);
+	x += r;
+	w -= r*2;
+	y += r;
+	h -= r*2;
+	this.ctx.beginPath();
+	this.ctx.moveTo(x+r, y-r);
+	this.ctx.lineTo(x+w-r, y-r);
+	this.ctx.quadraticCurveTo(x+w+r, y-r, x+w+r, y+r);
+	this.ctx.lineTo(x+w+r, y+h-r);
+	this.ctx.quadraticCurveTo(x+w+r, y+h+r, x+w-r, y+h+r);
+	this.ctx.lineTo(x+r, y+h+r);
+	this.ctx.quadraticCurveTo(x-r, y+h+r, x-r, y+h-r);
+	this.ctx.lineTo(x-r, y+r);
+	this.ctx.quadraticCurveTo(x-r, y-r, x+r, y-r);
+	this._mode(mode);
+	this.ctx.closePath();
 }
 
 love.graphics.circle = function (mode,x,y,r) {
 	this.ctx.beginPath();
 	this.ctx.arc(x,y,Math.abs(r),0,2*Math.PI);
 	love.graphics._mode(mode)
+	this.ctx.closePath();
 }
 
 love.graphics.arc = function (mode,x,y,r,a1,a2) {
@@ -79,6 +103,7 @@ love.graphics.arc = function (mode,x,y,r,a1,a2) {
 	this.ctx.arc(x,y,Math.abs(r),a1,a2);
 	this.ctx.lineTo(x,y);
 	love.graphics._mode(mode);
+	this.ctx.closePath();
 }
 
 love.graphics.clear = function () {
@@ -126,15 +151,18 @@ love.graphics.polygon = function (mode, verts) {
 	love.graphics._mode(mode);
 }
 
-love.graphics.print = function (t,x,y,r,sx,sy,ox,oy) {
-	x = x || 0;
-	y = y || 0;
-	r = r || 0;
-	sx = sx || 1;
-	sy = sy || 1;
-	ox = ox || 0;
-	oy = oy || 0;
+love.graphics.print = function (t,x,y,r,sx,sy,ox,oy,kx,ky) {
+	x = x == null ? 0 : x;
+	y = y == null ? x : y;
+	r = r == null ? 0 : r;
+	sx = sx == null ? 1 : sx;
+	sy = sy == null ? sx : sy;
+	ox = ox == null ? 0 : ox;
+	oy = oy == null ? ox : oy;
+	kx = kx == null ? 0 : kx;
+	ky = ky == null ? kx : ky;
 	this.ctx.save();
+	this.ctx.transform(1,ky,kx,1,0,0);
 	this.ctx.translate(x,y);
 	this.ctx.scale(sx,sy);
 	this.ctx.rotate(r);
@@ -143,17 +171,19 @@ love.graphics.print = function (t,x,y,r,sx,sy,ox,oy) {
 }
 
 //Note: Doesn't work perfect yet with rotation.
-love.graphics.printf = function (t,x,y,limit,align,r,sx,sy,ox,oy) {
-	x = x || 0;
-	y = y || 0;
-	r = r || 0;
-	sx = sx || 1;
-	sy = sy || 1;
-	ox = ox || 0;
-	oy = oy || 0;
+love.graphics.printf = function (t,x,y,limit,align,r,sx,sy,ox,oy,kx,ky) {
+	x = x == null ? 0 : x;
+	y = y == null ? x : y;
+	r = r == null ? 0 : r;
+	sx = sx == null ? 1 : sx;
+	sy = sy == null ? sx : sy;
+	ox = ox == null ? 0 : ox;
+	oy = oy == null ? ox : oy;
+	kx = kx == null ? 0 : kx;
+	ky = ky == null ? kx : ky;
 	this.ctx.textAlign=align;
 	
-	var words = t.split(' ');
+	var words = t.toString().split(' ');
     var line = '';
 	
 	for(var i = 0; i < words.length; i++) {
@@ -162,14 +192,15 @@ love.graphics.printf = function (t,x,y,limit,align,r,sx,sy,ox,oy) {
       var testWidth = metrics.width;
       if (testWidth > limit && i > 0) {
       	this.ctx.save();
+		this.ctx.transform(1,ky,kx,1,0,0);
 		this.ctx.translate(x,y);
 		this.ctx.scale(sx,sy);
 		this.ctx.rotate(r);
-      	this.ctx.fillText(line, -ox,-oy);
+      	this.ctx.fillText(line, -ox,-oy+this.font.size);
 		this.ctx.restore();
 
         line = words[i] + ' ';
-        y += this.fontSize+10*sy;
+        y += this.fontSize*2.3+sy;
       }
       else {
         line = testLine;
@@ -177,24 +208,25 @@ love.graphics.printf = function (t,x,y,limit,align,r,sx,sy,ox,oy) {
     }
 
  	this.ctx.save();
+	this.ctx.transform(1,ky,kx,1,0,0);
 	this.ctx.translate(x,y);
 	this.ctx.scale(sx,sy);
 	this.ctx.rotate(r);
-  	this.ctx.fillText(line, -ox,-oy);
+  	this.ctx.fillText(line, -ox,-oy+this.font.size);
 	this.ctx.restore();
 	this.ctx.textAlign="left";
 }
 
 love.graphics._draw = function (img,x,y,r,sx,sy,ox,oy,kx,ky,quad) {
-	x = x || 0;
-	y = y || 0;
-	r = r || 0;
-	sx = sx || 1;
-	sy = sy || sx;
-	ox = ox || 0;
-	oy = oy || 0;
-	kx = kx || 0;
-	ky = ky || 0;
+	x = x == null ? 0 : x;
+	y = y == null ? x : y;
+	r = r == null ? 0 : r;
+	sx = sx == null ? 1 : sx;
+	sy = sy == null ? sx : sy;
+	ox = ox == null ? 0 : ox;
+	oy = oy == null ? ox : oy;
+	kx = kx == null ? 0 : kx;
+	ky = ky == null ? kx : ky;
 
 	if (img.filter != "default") {
 		this.ctx.imageSmoothingEnabled = img.filter == "linear";
@@ -214,7 +246,7 @@ love.graphics._draw = function (img,x,y,r,sx,sy,ox,oy,kx,ky,quad) {
 	this.ctx.scale(sx,sy);
 	this.ctx.rotate(r);
 	if (quad) {
-		this.ctx.drawImage(img.drawable,quad.viewport.sx,quad.viewport.sy,quad.viewport.sw,quad.viewport.sh,-ox,-oy,quad.viewport.sw,quad.viewport.sh);
+		this.ctx.drawImage(this.images[img.url],quad.viewport.sx,quad.viewport.sy,quad.viewport.sw,quad.viewport.sh,-ox,-oy,quad.viewport.sw,quad.viewport.sh);
 	}
 	else{
 		this.ctx.drawImage(this.images[img.url],-ox,-oy);
@@ -235,10 +267,9 @@ love.graphics.draw = function (img,quad,x,y,r,sx,sy,ox,oy,kx,ky) {
 //New functions
 
 love.graphics.newImage = function (url) {
+	if (this.images[url]==null) { throw("You forgot to preload the image!")}
 	var img;
 	img = {};
-	img.drawable = new Image();
-	img.drawable.src = url;
 	img.url = url;
 	img.filter = "default";
 	img.wrap = "clamp"
@@ -264,7 +295,7 @@ love.graphics.newImage = function (url) {
 	}
 
 	img.getHeight = function () {
-		return love.graphics.images[this.url].width;
+		return love.graphics.images[this.url].height;
 	}
 
 	img.getWrap = function () {
@@ -465,6 +496,11 @@ love.graphics.setColor = function (r,g,b,a) {
 	}
 }
 
+love.graphics.setAlpha = function (a) {
+	this.color.a = a;
+	this.ctx.globalAlpha = a/255;
+}
+
 love.graphics.setBackgroundColor = function (r,g,b) {
 	if (typeof(r)=="object") {
 		this.backgroundColor.r = r[0] || this.backgroundColor.r;
@@ -492,7 +528,11 @@ love.graphics.setNewFont = function (fnt,size) {
 
 love.graphics.setFont = function (fnt) {
 	this.font = fnt;
-	this.ctx.font = this.font.size + "pt " + this.font.name
+	this.ctx.font = this.font.size + "pt " + this.font.name;
+}
+
+love.graphics._resetFont = function () {
+	this.ctx.font = this.font.size + "pt " + this.font.name;
 }
 
 love.graphics.setBlendMode = function (mode) {
@@ -514,14 +554,20 @@ love.graphics.setCanvas = function (cvs) {
 
 love.graphics.setScissor = function (x,y,w,h) {
 	if (x == null) {
-		this.ctx.rect(0,0,this.canvas.width,this.canvas.height);
 		this.scissor = null;
+		this.ctx.restore();
 	}
-	this.ctx.save();
-	this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-	this.ctx.rect(x,y,w,h);
-	this.ctx.restore();
-	this.ctx.clip();
+	else {
+		this.ctx.save();
+		this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+		this.ctx.beginPath();
+		this.ctx.rect(x,y,w,h);
+		this.ctx.restore();
+		this.ctx.save();
+		this.ctx.clip();
+		this.ctx.closePath();
+
+	}
 }
 
 
@@ -537,7 +583,7 @@ love.graphics.getDefaultFilter = function () {
 }
 
 love.graphics.getColor = function () {
-	return [this.color.r,this.color,g,this.color.b,this.color.a];
+	return [this.color.r,this.color.g,this.color.b,this.color.a];
 }
 
 love.graphics.getBackgroundColor = function () {
@@ -545,7 +591,7 @@ love.graphics.getBackgroundColor = function () {
 }
 
 love.graphics.getLineWidth = function () {
-	return this.ctx.lineWidth;
+	return this.ctx.lineWidth-1;
 }
 
 love.graphics.getPointSize = function () {
@@ -638,7 +684,7 @@ love.graphics._rgb = function (r,g,b) {
 
 love.audio = {};
 love.audio.sources = {};
-love.masterVolume = {};
+love.masterVolume = 1;
 
 love.audio.preload = function () {
 	for (var i = 0; i < arguments.length; i++) {
@@ -691,8 +737,8 @@ love.audio.newSource = function (url) {
 
 	var source;
 	source = {};
-	source.audio = new Audio();
-	source.audio.src = url;
+	source.audio = this.sources[url];
+	// source.audio.src = url;
 
 	source.stopped = false;
 	source.playing = false;
@@ -784,7 +830,7 @@ love.audio.newSource = function (url) {
 //Keyboard
 
 love.keyboard = {};
-love.keyboard.keysDown = [];
+love.keyboard.keysDown = {};
 love.keyboard.constant = {
 	8: "backspace",
 	9: "tab",
@@ -890,16 +936,17 @@ love.mouse.buttonsDown = [];
 love.mouse.constant = {
 	0:"l",
 	1:"m",
-	2:"r"
+	2:"r",
+	4:"wu",
+	5:"wd"
 };
 
 love.mouse._move = function (event) {
-	love.mouse.x = event.clientX;
-	love.mouse.y = event.clientY;
+	love.mouse.x = event.clientX-9;
+	love.mouse.y = event.clientY-9;
 }
 
 love.mouse._downHandler = function (event) {
-	event.preventDefault();
 	var mousepressed = love.mouse.constant[event.button];
 	love.mouse.buttonsDown[mousepressed] = true;
 	if (love.mousepressed) {
@@ -908,11 +955,18 @@ love.mouse._downHandler = function (event) {
 }
 
 love.mouse._upHandler = function (event) {
-	event.preventDefault();
 	var mousereleased = love.mouse.constant[event.button];
 	love.mouse.buttonsDown[mousereleased] = false;
 	if (love.mousereleased) {
 		love.mousereleased(event.clientX,event.clientY,mousereleased);
+	}
+}
+
+love.mouse._wheelHandler = function (event) {
+	event.preventDefault();
+	var mousepressed = love.mouse.constant[event.wheelDelta > 0 ? 4 : 5];
+	if (love.mousepressed) {
+		love.mousepressed(event.clientX,event.clientY,mousepressed);
 	}
 }
 
@@ -931,6 +985,10 @@ love.mouse.isDown = function () {
 		}
 	}
 	return false;
+}
+
+love.mouse.setCursor = function (cursor) {
+	document.getElementById("canvas").style.cursor=cursor;
 }
 
 
@@ -994,8 +1052,8 @@ love.run = function () {
 			if (love.config) {
 				var conf = {};
 				love.config(conf);
-				this.canvas.width = conf.width != null ? conf.width : 800;
-				this.canvas.height = conf.height != null ? conf.height : 600;
+				love.graphics.canvas.width = conf.width != null ? conf.width : 800;
+				love.graphics.canvas.height = conf.height != null ? conf.height : 600;
 				love.filesystem.identity = typeof(conf.identity) == "string" ? conf.identity + "/" : null;
 			}
 			love.graphics.imageSmoothingEnabled = true;
@@ -1033,6 +1091,7 @@ love.graphics.drawloop = function (a) {
 		this.ctx.fillStyle = this._rgb(this.color.r,this.color.g,this.color.b);
 		this.ctx.strokeStyle = this._rgb(this.color.r,this.color.g,this.color.b);
 		this.ctx.globalAlpha = this.color.a/255;
+		this.setFont(this.font);
 	 	love.draw();
 	}
 }

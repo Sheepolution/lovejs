@@ -9,6 +9,7 @@ var init = function () {
 	document.addEventListener("mousemove",love.mouse._move, false);
 	document.addEventListener("mousedown",love.mouse._downHandler, false);
 	document.addEventListener("mouseup",love.mouse._upHandler, false);
+	document.addEventListener("mousewheel",love.mouse._wheelHandler, false);
 	love.graphics.ctx=love.graphics.canvas.getContext('2d');
 	love.graphics.defaultCtx = love.graphics.ctx;
 }

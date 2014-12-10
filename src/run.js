@@ -19,8 +19,8 @@ love.run = function () {
 			if (love.config) {
 				var conf = {};
 				love.config(conf);
-				this.canvas.width = conf.width != null ? conf.width : 800;
-				this.canvas.height = conf.height != null ? conf.height : 600;
+				love.graphics.canvas.width = conf.width != null ? conf.width : 800;
+				love.graphics.canvas.height = conf.height != null ? conf.height : 600;
 				love.filesystem.identity = typeof(conf.identity) == "string" ? conf.identity + "/" : null;
 			}
 			love.graphics.imageSmoothingEnabled = true;
@@ -58,6 +58,7 @@ love.graphics.drawloop = function (a) {
 		this.ctx.fillStyle = this._rgb(this.color.r,this.color.g,this.color.b);
 		this.ctx.strokeStyle = this._rgb(this.color.r,this.color.g,this.color.b);
 		this.ctx.globalAlpha = this.color.a/255;
+		this.setFont(this.font);
 	 	love.draw();
 	}
 }

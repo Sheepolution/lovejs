@@ -1,10 +1,8 @@
 //Audio
 
 love.audio = {};
-
 love.audio.sources = {};
-
-love.masterVolume = {};
+love.masterVolume = 1;
 
 love.audio.preload = function () {
 	for (var i = 0; i < arguments.length; i++) {
@@ -57,8 +55,8 @@ love.audio.newSource = function (url) {
 
 	var source;
 	source = {};
-	source.audio = new Audio();
-	source.audio.src = url;
+	source.audio = this.sources[url];
+	// source.audio.src = url;
 
 	source.stopped = false;
 	source.playing = false;
