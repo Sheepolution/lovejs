@@ -67,9 +67,24 @@ love.graphics.rectangle = function (mode,x,y,w,h) {
 	love.graphics._mode(mode);
 }
 
-love.graphics.circle = function (mode,x,y,r) {
+love.graphics.circle = function (mode,x,y,r,s) {
 	this.ctx.beginPath();
-	this.ctx.arc(x,y,Math.abs(r),0,2*Math.PI);
+	if (s == null) {
+		this.ctx.arc(x,y,Math.abs(r),0,2*Math.PI);
+	}
+	else{
+		var verts = [];
+		for (var i = 0; i < (s*2); i+=2) {
+			verts[i] =   x + Math.cos(i*(Math.PI/s))*r;
+			verts[i+1] = y + Math.sin(i*(Math.PI/s))*r;
+		};
+		this.ctx.moveTo(verts[0],verts[1]);
+		for (var i = 0; i < verts.length-2; i+=2) {
+			this.ctx.lineTo(verts[i+2],verts[i+3]);
+			this.ctx.stroke();
+		};
+		this.ctx.closePath();
+	}
 	love.graphics._mode(mode)
 }
 
@@ -116,7 +131,7 @@ love.graphics.point = function (x,y) {
 
 love.graphics.polygon = function (mode, verts) {
 	this.ctx.beginPath();
-	var verts = arguments[0];
+	var verts = arguments[1];
 	this.ctx.moveTo(verts[0],verts[1]);
 	for (var i = 0; i < verts.length-2; i+=2) {
 		this.ctx.lineTo(verts[i+2],verts[i+3]);
