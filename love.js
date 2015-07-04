@@ -1019,7 +1019,6 @@ love.run = function () {
 			love.graphics.imageSmoothingEnabled = true;
 			love.graphics.ctx.strokeStyle = love.graphics._rgb(255,255,255);
 			love.graphics.setFont(love.graphics.newFont("arial",10))
-			love.load();
 			love.loop(0);
 			window.cancelAnimFrame(love.run);
 		}
