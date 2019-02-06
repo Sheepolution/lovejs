@@ -300,7 +300,7 @@ All the modules and their functions that are currently implemented. If a module/
 
 **keyreleased( key )**
 
-##Mouse
+## Mouse
 
 **getX( )**
 
@@ -312,7 +312,7 @@ All the modules and their functions that are currently implemented. If a module/
 
 **mousereleased( x, y, button )**
 
-##Filesystem
+## Filesystem
 
 **read( name )**
 
