@@ -3,6 +3,11 @@ loveJS
 
 A copy of the LÖVE API into javascript.
 
+WARNING
+---
+This port requries you to use Javascript.
+You were probably looking for [love.js](https://github.com/Davidobot/love.js/), the version that uses Emscripten and is way better. You can find that [here](https://github.com/Davidobot/love.js/).
+
 
 Installation
 ---
